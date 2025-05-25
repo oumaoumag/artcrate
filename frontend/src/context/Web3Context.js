@@ -14,6 +14,9 @@ export const Web3Provider = ({ children }) => {
             await provider.send('eth_requestAccounts', []);
             const signer = provider.getSigner();
             const address = await getAddress();
+            setProvider(provider);
+            setAcount(account);
+            c
         }
     }
 
