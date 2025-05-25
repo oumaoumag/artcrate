@@ -73,8 +73,18 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
         view
         override(ERC721, ERC721URIStorage)
         returns (string memory)
-        {
-            return super.tokenURI(tokenId);
-        }
+    {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (bool)
+     {
+        return super.supportsInterface(interfaceId); 
+    }
+    
 
 }
