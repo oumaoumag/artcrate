@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
     // ERC20 TOken implementation
     ERC20 public creatorToken;
-    
+
     // Token ID tracking
     uint256 private _nextTokenId = 1;
 
@@ -29,11 +29,11 @@ contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
     error TransferDisabled();
 
     constructor(uint256 initialReward) 
-        ERC20("CreatorToken", "CTK")
         ERC721("ArtNFT", "ANFT")
         Ownable(msg.sender)
         {
             rewardAmount = initialReward;
+            creatorToken = new ERC20("creatorToken", "CTK");
         }
 
    // Main mint function with reentrancy protection
