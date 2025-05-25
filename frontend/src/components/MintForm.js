@@ -78,7 +78,7 @@ const MintForm = () => {
             const metadata = createNFTMetadata(
                 formData.title,
                 formData.description,
-                imageUpload.hash,
+                imageUpload.url, // Use the actual image URL instead of hash
                 account
             );
 
