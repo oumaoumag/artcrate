@@ -53,5 +53,11 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
         rewardAmount = newAmount;
         emit RewardUpdated(newAmount);
     }
+
+    // Overide transfer functions to disable token tranfers
+    function transfer(address, uint256) public pure override returns (bool) {
+        revert TransferDisabled();
+    }
+    
     
 }
