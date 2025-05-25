@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
+    // ERC20 TOken implementation
+    ERC20 public creatorToken;
+    
     // Token ID tracking
     uint256 private _nextTokenId = 1;
 
