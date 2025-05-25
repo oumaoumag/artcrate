@@ -33,18 +33,18 @@ contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
             rewardAmount = initialReward;
         }
 
-    // Main min function with reentrancy protection
-    function mintNFT(string memory tokenURI) external nonReentract {
-        if (bytes(tokenURI).length == 0) revert InvalidTokenURI();
+   // Main mint function with reentrancy protection
+    function mintNFT(string memory uri) external nonReentrant {
+        if (bytes(uri).length == 0) revert InvalidTokenURI();
         if (_nextTokenId >= MAX_SUPPLY) revert MaxSupplyReached();
-
+        
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, tokenURI);
-
+        _setTokenURI(tokenId, uri);
+        
         creators[tokenId] = msg.sender;
         _mint(msg.sender, rewardAmount);
-
+        
         emit NFTMinted(msg.sender, tokenId);
     }
 
@@ -59,12 +59,12 @@ contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
         revert TransferDisabled();
     }
 
-    function transferFrom(address, address, uint256) public pure overide returns (bool) {
+    function transferFrom(address, address, uint256) public pure override returns (bool) {
         revert TransferDisabled();
     }
 
     // Required overrides
-    function _burn(uint256 tokenId) internal overrid(ERC21, ERC721URIStorage) {
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }    
 
