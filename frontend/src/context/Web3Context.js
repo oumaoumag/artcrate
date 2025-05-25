@@ -16,7 +16,13 @@ export const Web3Provider = ({ children }) => {
             const address = await getAddress();
             setProvider(provider);
             setAcount(account);
-            c
+
+            const contract = new ethers.Contract(
+                'contract_address',
+                [
+                    'function mint(string memory tokenU'
+                ]
+            )
         }
     }
 
