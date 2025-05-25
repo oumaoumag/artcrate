@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
+contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
     // Token ID tracking
     uint256 private _nextTokenId = 1;
 
@@ -85,6 +85,4 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
      {
         return super.supportsInterface(interfaceId); 
     }
-    
-
 }
