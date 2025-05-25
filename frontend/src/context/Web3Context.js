@@ -188,9 +188,16 @@ export const Web3Provider = ({ children }) => {
         }
     };
 
-    // Load user's NFTs from the contract
+    // Load user's NFTs from localStorage and contract
     const loadUserNFTs = async (contractInstance, userAddress) => {
         try {
+            // First, load from localStorage for immediate display
+            const localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+            if (localNFTs.length > 0) {
+                setMintedNFTs(localNFTs);
+            }
+
+            // Then load from contract for verification
             const nftBalance = await contractInstance.nftBalanceOf(userAddress);
             const nfts = [];
 
@@ -200,11 +207,25 @@ export const Web3Provider = ({ children }) => {
                     const tokenURI = await contractInstance.tokenURI(tokenId);
                     const creator = await contractInstance.creators(tokenId);
 
-                    // Fetch metadata from IPFS
+                    // Check if we have this NFT in localStorage first
+                    const localNFT = localNFTs.find(nft => nft.id === tokenId.toString());
+                    if (localNFT) {
+                        nfts.push(localNFT);
+                        continue;
+                    }
+
+                    // Fetch metadata from IPFS/data URL
                     let metadata = {};
                     try {
-                        const response = await fetch(tokenURI);
-                        metadata = await response.json();
+                        if (tokenURI.startsWith('data:application/json;base64,')) {
+                            // Decode data URL
+                            const base64Data = tokenURI.split(',')[1];
+                            const jsonString = atob(base64Data);
+                            metadata = JSON.parse(jsonString);
+                        } else {
+                            const response = await fetch(tokenURI);
+                            metadata = await response.json();
+                        }
                     } catch (metadataError) {
                         console.warn('Error fetching metadata for token', tokenId, metadataError);
                         metadata = {
@@ -214,21 +235,25 @@ export const Web3Provider = ({ children }) => {
                         };
                     }
 
-                    nfts.push({
+                    const nftData = {
                         id: tokenId.toString(),
                         title: metadata.name || `NFT #${tokenId}`,
                         description: metadata.description || '',
                         image: metadata.image || '',
                         creator: creator,
                         tokenURI: tokenURI,
-                        timestamp: new Date().toISOString(), // We don't have exact timestamp from contract
-                        reward: 10, // Default reward amount
-                    });
+                        timestamp: new Date().toISOString(),
+                        reward: 10,
+                    };
+
+                    nfts.push(nftData);
                 } catch (tokenError) {
                     console.warn('Error loading token at index', i, tokenError);
                 }
             }
 
+            // Update localStorage with contract data
+            localStorage.setItem('userNFTs', JSON.stringify(nfts));
             setMintedNFTs(nfts);
         } catch (error) {
             console.error('Error loading user NFTs:', error);
@@ -245,11 +270,32 @@ export const Web3Provider = ({ children }) => {
             const tx = await contract.mintNFT(metadataURI);
             const receipt = await tx.wait();
 
+            // Get the token ID from the event
+            const event = receipt.events?.find(e => e.event === 'Transfer');
+            const tokenId = event?.args?.tokenId;
+
+            if (tokenId) {
+                // Try to decode metadata from the URI for immediate display
+                try {
+                    let metadata = {};
+                    if (metadataURI.startsWith('data:application/json;base64,')) {
+                        const base64Data = metadataURI.split(',')[1];
+                        const jsonString = atob(base64Data);
+                        metadata = JSON.parse(jsonString);
+                    }
+
+                    // Store NFT locally for immediate display
+                    storeNFTLocally(tokenId, metadata, account);
+                } catch (metadataError) {
+                    console.warn('Could not decode metadata for immediate display:', metadataError);
+                }
+            }
+
             // Update token balance after successful mint
             const newTokenBalance = await contract.tokenBalanceOf(account);
             setTokenBalance(ethers.utils.formatEther(newTokenBalance));
 
-            // Reload NFTs
+            // Reload NFTs (this will merge with localStorage data)
             await loadUserNFTs(contract, account);
 
             return receipt;
@@ -336,6 +382,29 @@ export const Web3Provider = ({ children }) => {
         setTokenBalance(prev => (parseFloat(prev) + 10).toString());
     };
 
+    // Store NFT data locally for immediate display
+    const storeNFTLocally = (tokenId, metadata, creator) => {
+        const nftData = {
+            id: tokenId.toString(),
+            title: metadata.name || `NFT #${tokenId}`,
+            description: metadata.description || '',
+            image: metadata.image || '',
+            creator: creator,
+            timestamp: new Date().toISOString(),
+            reward: 10,
+        };
+
+        // Store in localStorage for persistence
+        const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+        const updatedNFTs = [nftData, ...existingNFTs.filter(nft => nft.id !== tokenId.toString())];
+        localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
+
+        // Add to state
+        addMintedNFT(nftData);
+
+        return nftData;
+    };
+
     const value = {
         // State
         account,
@@ -356,6 +425,7 @@ export const Web3Provider = ({ children }) => {
         transferTokens,
         getContractInfo,
         addMintedNFT,
+        storeNFTLocally,
         loadUserNFTs,
     };
 
