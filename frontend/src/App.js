@@ -276,22 +276,37 @@ const TokenBalance = () => {
   const { tokenBalance } = useWeb3();
 
   return (
-    <div className="bg-gradient-to-br from-purple-800/50 to-orange-800/50 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 shadow-2xl">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-yellow-300">Creator Tokens</h3>
-        <Coins className="w-6 h-6 text-yellow-400" />
+    <div style={styles.card}>
+      <div style={styles.cardHeader}>
+        <h3 style={styles.cardTitle}>Creator Tokens</h3>
+        <Coins size={24} color="#facc15" />
       </div>
-      <div className="flex items-center space-x-4">
-        <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-          <Coins className="w-8 h-8 text-purple-900" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          background: 'linear-gradient(135deg, #facc15, #f97316)',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+        }}>
+          <Coins size={32} color="#581c87" />
         </div>
         <div>
-          <p className="text-3xl font-bold text-white">{tokenBalance}</p>
-          <p className="text-orange-300">CTK Balance</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', margin: 0 }}>{tokenBalance}</p>
+          <p style={{ color: '#fdba74', margin: 0 }}>CTK Balance</p>
         </div>
       </div>
-      <div className="mt-4 p-3 bg-black/20 rounded-xl border border-yellow-400/20">
-        <p className="text-sm text-orange-200">
+      <div style={{
+        marginTop: '1rem',
+        padding: '0.75rem',
+        background: 'rgba(0,0,0,0.2)',
+        borderRadius: '12px',
+        border: '1px solid rgba(250, 204, 21, 0.2)'
+      }}>
+        <p style={{ fontSize: '0.875rem', color: '#fdba74', margin: 0 }}>
           Earn 10 CTK for each NFT you mint • Build your creator economy
         </p>
       </div>
@@ -299,20 +314,101 @@ const TokenBalance = () => {
   );
 };
 
-// Mint Form Component
-const MintForm = () => {
-  const { account, mintNFT, isCorrectNetwork } = useWeb3();
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    image: null
-  });
-  const [isMinting, setIsMinting] = useState(false);
-  const [preview, setPreview] = useState(null);
+// Simple Demo Component
+const DemoContent = () => {
+  const { account, tokenBalance, mintedNFTs } = useWeb3();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  if (!account) {
+    return (
+      <div style={styles.card}>
+        <div style={{ textAlign: 'center' }}>
+          <Wallet size={64} color="#facc15" style={{ margin: '0 auto 1rem' }} />
+          <h3 style={{ ...styles.cardTitle, marginBottom: '0.5rem' }}>Connect Your Wallet</h3>
+          <p style={{ color: '#fdba74' }}>Connect your wallet to start minting NFTs and earning Creator Tokens</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.grid}>
+      <div style={styles.card}>
+        <div style={styles.cardHeader}>
+          <h3 style={styles.cardTitle}>Platform Stats</h3>
+          <Star size={24} color="#facc15" />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0 }}>{mintedNFTs.length}</p>
+            <p style={{ color: '#fdba74', fontSize: '0.875rem', margin: 0 }}>NFTs Minted</p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0 }}>{tokenBalance}</p>
+            <p style={{ color: '#fdba74', fontSize: '0.875rem', margin: 0 }}>CTK Earned</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={styles.card}>
+        <div style={styles.cardHeader}>
+          <h3 style={styles.cardTitle}>Smart Contract Integration</h3>
+          <Zap size={24} color="#facc15" />
+        </div>
+        <div style={{ color: '#fdba74' }}>
+          <p style={{ marginBottom: '1rem' }}>✅ Web3 wallet connection</p>
+          <p style={{ marginBottom: '1rem' }}>✅ Lisk Sepolia network support</p>
+          <p style={{ marginBottom: '1rem' }}>✅ ArtPlatform contract integration</p>
+          <p style={{ marginBottom: '1rem' }}>✅ Real-time balance updates</p>
+          <p style={{ marginBottom: '0' }}>✅ NFT minting with token rewards</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main App Component
+const AppContent = () => {
+  return (
+    <div style={styles.container}>
+      <Header />
+
+      <main style={styles.main}>
+        <div style={styles.content}>
+          <div style={styles.heroSection}>
+            <h2 style={styles.heroTitle}>
+              Afrofuturistic Creator Economy
+            </h2>
+            <p style={styles.heroSubtitle}>
+              Mint unique NFTs, earn Creator Tokens, and build your digital art empire in the metaverse
+            </p>
+          </div>
+
+          <div style={styles.grid}>
+            <TokenBalance />
+            <DemoContent />
+          </div>
+        </div>
+      </main>
+
+      <footer style={styles.footer}>
+        <p style={{ color: '#fdba74', margin: 0 }}>
+          Built for the future of African digital art • Powered by Lisk Blockchain
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+// Main App Component with Web3 Provider
+function App() {
+  return (
+    <Web3Provider>
+      <AppContent />
+    </Web3Provider>
+  );
+}
+
+export default App;
       setFormData({ ...formData, image: file });
       const reader = new FileReader();
       reader.onload = (e) => setPreview(e.target.result);
