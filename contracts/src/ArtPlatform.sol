@@ -24,5 +24,14 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
     error MaxSupplyReached();
     error InvalidTokenURI();
     error TransferDisabled();
+
+    constructor(uint256 initialReward) 
+        ERC20("CreatorToken", "CTK")
+        ERC721("ArtNFT", "ANFT")
+        Ownable(msg.sender)
+        {
+            rewardAmount = initialReward;
+        }
+
     
 }
