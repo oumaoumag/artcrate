@@ -19,6 +19,6 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
 
     // Events
     event NFTMinted(address indexed creator, uint256 indexed tokenId);
-
+    event RewardUpdated(uint256 newAmount);
     
 }
