@@ -58,6 +58,14 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
     function transfer(address, uint256) public pure override returns (bool) {
         revert TransferDisabled();
     }
-    
-    
+
+    function transferFrom(address, address, uint256) public pure overide returns (bool) {
+        revert TransferDisabled();
+    }
+
+    // Required overrides
+    function _burn(uint256 tokenId) internal overrid(ERC21, ERC721URIStorage) {
+        super._burn(tokenId);
+    }    
+
 }
