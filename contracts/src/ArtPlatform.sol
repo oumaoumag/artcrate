@@ -36,17 +36,17 @@ contract ArtPlatform  is ERC20, ERC721URIStorage, Ownable, ReentrancyGuard {
             creatorToken = new ERC20("creatorToken", "CTK");
         }
 
-   // Main mint function with reentrancy protection
-    function mintNFT(string memory uri) external nonReentrant {
-        if (bytes(uri).length == 0) revert InvalidTokenURI();
+    // Main mint function with reentrancy protection
+    function mintNFT(string memory tokenURI) external nonReentrant {
+        if (bytes(tokenURI).length == 0) revert InvalidTokenURI();
         if (_nextTokenId >= MAX_SUPPLY) revert MaxSupplyReached();
         
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, uri);
+        _setTokenURI(tokenId, tokenURI);
         
         creators[tokenId] = msg.sender;
-        _mint(msg.sender, rewardAmount);
+        creatorToken._mint(msg.sender, rewardAmount);
         
         emit NFTMinted(msg.sender, tokenId);
     }
