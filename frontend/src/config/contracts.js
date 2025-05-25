@@ -1,7 +1,7 @@
 // Contract configuration
 export const CONTRACTS = {
-  // Replace with your deployed contract address
-  ART_PLATFORM: process.env.REACT_APP_CONTRACT_ADDRESS || "0x742d35Cc6635C0532925a3b8D4e6fa695b4C8b6b",
+  // ArtPlatform contract deployed on Lisk Sepolia
+  ART_PLATFORM: process.env.REACT_APP_CONTRACT_ADDRESS || "0xC11a4C0bbC828173FB39909C0E81e9251b07B880",
 };
 
 // Network configuration
