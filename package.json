@@ -1,0 +1,32 @@
+{
+  "name": "artcrate",
+  "version": "1.0.0",
+  "description": "A production-ready NFT platform with creator rewards",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "contracts"
+  ],
+  "scripts": {
+    "start": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "test": "cd frontend && npm test",
+    "deploy": "cd contracts && forge script script/DeployArtPlatform.s.sol:DeployArtPlatform --rpc-url https://rpc.sepolia-api.lisk.com --broadcast",
+    "test-contracts": "cd contracts && forge test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/artcrate.git"
+  },
+  "keywords": [
+    "nft",
+    "web3",
+    "ethereum",
+    "lisk",
+    "react",
+    "solidity",
+    "ipfs"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
