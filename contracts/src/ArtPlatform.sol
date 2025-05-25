@@ -13,5 +13,12 @@ contract ArtPlatform  is ERC20, ERC721UIStorage, Owner, ReentrancyGuard {
     // Reward configuration
     uint256 public rewardAmount;
     uint256 public constant MAX_SUPPLY = type(uint256).max;
+
+    // Token metadata
+    mapping(uint256 => address) public creators;
+
+    // Events
+    event NFTMinted(address indexed creator, uint256 indexed tokenId);
+
     
 }
