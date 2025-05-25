@@ -8,5 +8,13 @@ export const Web3Provider = ({ children }) => {
     const [contract, setContract] = useState(null);
     const [provider, setProvider] = useState(null);
 
+    const connectWallet = async() => {
+        if (window.ethereum) {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send('eth_requestAccounts', []);
+            const signer = provider.getSigner();
+            const address = await getAddress();
+        }
+    }
 
 }
