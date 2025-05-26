@@ -1,34 +1,34 @@
-Great! Here's a complete, clean, and professional `README.md` template for your **ArtCrate** project — perfect for GitHub:
+# 🎨 ArtCrate - NFT Platform with Creator Rewards
 
----
+A production-ready decentralized NFT platform built on Lisk Sepolia where creators earn tokens when users mint their NFTs. Built with modern Web3 technologies and best practices.
 
-````markdown
-# 🎨 ArtCrate
+## 🚀 Live Deployment
 
-*A token-powered NFT platform that rewards creators with every mint.*
-
-ArtCrate is a decentralized application (dApp) that allows users to mint and collect NFTs representing unique digital artwork. Every time someone mints an NFT, the original creator automatically receives ERC20 tokens as a reward. ArtCrate is built on Solidity and React, and deployed on Lisk Sepolia.
+**Frontend**: Production Ready - Start with `npm start`
+**Smart Contract**: `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
+**Network**: Lisk Sepolia Testnet
+**Explorer**: [View Contract](https://sepolia-blockscout.lisk.com/address/0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8)
 
 ---
 
 ## 🚀 Features
 
-- ✅ **ERC721 NFT Collection**  
+- ✅ **ERC721 NFT Collection**
   Mint NFTs with metadata and assign creator attribution.
 
-- 💰 **ERC20 Token Rewards**  
+- 💰 **ERC20 Token Rewards**
   Creators earn a fixed amount of tokens for every NFT minted by others.
 
-- 🌐 **IPFS Integration**  
+- 🌐 **IPFS Integration**
   Metadata and images are stored on IPFS using Pinata or NFT.Storage.
 
-- 👛 **Web3 Wallet Support**  
+- 👛 **Web3 Wallet Support**
   Connect MetaMask and interact with smart contracts directly from the UI.
 
-- 🖼️ **NFT Gallery**  
+- 🖼️ **NFT Gallery**
   Browse all minted NFTs with creator addresses and token IDs.
 
-- 📊 **Reward Dashboard**  
+- 📊 **Reward Dashboard**
   Track token balances and minting events in real time.
 
 ---
@@ -117,5 +117,3 @@ MIT License. See `LICENSE` file for details.
 ## 🤝 Contributing
 
 Pull requests are welcome! For major changes, open an issue first to discuss what you'd like to change or add.
-
-
