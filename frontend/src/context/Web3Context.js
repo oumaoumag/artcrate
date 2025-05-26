@@ -214,17 +214,36 @@ export const Web3Provider = ({ children }) => {
                         continue;
                     }
 
-                    // Fetch metadata from IPFS/data URL
+                    // Fetch metadata from localStorage or fallback
                     let metadata = {};
                     try {
-                        if (tokenURI.startsWith('data:application/json;base64,')) {
+                        // Try to get from localStorage first
+                        const hashMatch = tokenURI.match(/Qm[a-zA-Z0-9]+/);
+                        if (hashMatch) {
+                            const hash = hashMatch[0];
+                            const stored = localStorage.getItem(`metadata_${hash}`);
+                            if (stored) {
+                                metadata = JSON.parse(stored);
+                            } else {
+                                // Fallback for IPFS URLs we can't fetch
+                                metadata = {
+                                    name: `NFT #${tokenId}`,
+                                    description: 'IPFS metadata (not cached)',
+                                    image: '',
+                                };
+                            }
+                        } else if (tokenURI.startsWith('data:application/json;base64,')) {
                             // Decode data URL
                             const base64Data = tokenURI.split(',')[1];
                             const jsonString = atob(base64Data);
                             metadata = JSON.parse(jsonString);
                         } else {
-                            const response = await fetch(tokenURI);
-                            metadata = await response.json();
+                            // Simple string URI
+                            metadata = {
+                                name: `NFT #${tokenId}`,
+                                description: tokenURI,
+                                image: '',
+                            };
                         }
                     } catch (metadataError) {
                         console.warn('Error fetching metadata for token', tokenId, metadataError);
@@ -267,7 +286,10 @@ export const Web3Provider = ({ children }) => {
         }
 
         try {
-            const tx = await contract.mintNFT(metadataURI);
+            // Try minting with minimal gas settings - let MetaMask handle gas price
+            const tx = await contract.mintNFT(metadataURI, {
+                gasLimit: 300000, // Conservative gas limit
+            });
             const receipt = await tx.wait();
 
             // Get the token ID from the event
@@ -275,19 +297,22 @@ export const Web3Provider = ({ children }) => {
             const tokenId = event?.args?.tokenId;
 
             if (tokenId) {
-                // Try to decode metadata from the URI for immediate display
+                // Try to get metadata from localStorage using the URI hash
                 try {
                     let metadata = {};
-                    if (metadataURI.startsWith('data:application/json;base64,')) {
-                        const base64Data = metadataURI.split(',')[1];
-                        const jsonString = atob(base64Data);
-                        metadata = JSON.parse(jsonString);
+                    const hashMatch = metadataURI.match(/Qm[a-zA-Z0-9]+/);
+                    if (hashMatch) {
+                        const hash = hashMatch[0];
+                        const stored = localStorage.getItem(`metadata_${hash}`);
+                        if (stored) {
+                            metadata = JSON.parse(stored);
+                        }
                     }
 
                     // Store NFT locally for immediate display
                     storeNFTLocally(tokenId, metadata, account);
                 } catch (metadataError) {
-                    console.warn('Could not decode metadata for immediate display:', metadataError);
+                    console.warn('Could not get metadata for immediate display:', metadataError);
                 }
             }
 
