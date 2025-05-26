@@ -15,11 +15,15 @@ export const uploadToIPFS = async (file, metadata) => {
     body: formData,
    });
 
+   if (!response.ok) {
+    throw new Error(`IPFS upload failed: ${ReportingObserver.statusText}`);
+   }
+   const data = await response.json();
     return {
       success: true,
       hash: mockHash,
-      url: dataUrl, // Use data URL instead of fake IPFS URL
-      dataUrl: dataUrl,
+      url: data.IpfsHash, 
+      dataUrl: `${IPFS_CONFIG.gateway}${data.IpfsHash}`,
     };
   } catch (error) {
     console.error('IPFS upload error:', error);
