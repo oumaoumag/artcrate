@@ -1,0 +1,10 @@
+{
+  "contractAddress": "0xC11a4C0bbC828173FB39909C0E81e9251b07B880",
+  "deployer": "0xF65781317f8E35891CD2edDa1Db26e56ba53B736",
+  "chainId": 4202,
+  "rewardAmount": "10000000000000000000",
+  "transactionHash": "0x04b3dcfecc894e3003012ca6576d5fe97b104576cf6d97bd13f18d1b3407dafb",
+  "network": "lisk-sepolia",
+  "explorerUrl": "https://sepolia-blockscout.lisk.com/address/0xC11a4C0bbC828173FB39909C0E81e9251b07B880",
+  "deployedAt": "2025-01-26T12:30:00Z"
+}
