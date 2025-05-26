@@ -1,66 +1,109 @@
-## Foundry
+# ArtCrate Platform - Smart Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A production-ready NFT platform smart contract that combines ERC721 NFTs with custom token rewards. When users mint NFTs, creators automatically earn Creator Tokens (CTK) as rewards.
 
-Foundry consists of:
+## 🚀 Live Deployment
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+**Contract Address:** `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
+**Network:** Lisk Sepolia Testnet
+**Explorer:** [View on Blockscout](https://sepolia-blockscout.lisk.com/address/0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8)
 
-## Documentation
+## ✨ Features
 
-https://book.getfoundry.sh/
+✅ **Dual Token System**
+- ERC721 NFTs for unique digital art pieces
+- Custom ERC20-like tokens (CTK) for creator rewards
 
-## Usage
+✅ **Automatic Rewards**
+- 10 CTK tokens earned per NFT mint
+- Configurable reward amounts (owner only)
+
+✅ **Security Features**
+- OpenZeppelin security standards
+- Reentrancy protection on all state-changing functions
+- Pausable functionality for emergency stops
+- Owner-only administrative functions
+
+✅ **Supply Limits**
+- Max 10,000 NFTs (prevents oversupply)
+- Max 1,000,000 CTK tokens (economic stability)
+- Max 1,000 CTK reward per mint (prevents abuse)
+
+## 🛠 Development Setup
+
+### Prerequisites
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
+- Lisk Sepolia ETH ([Faucet](https://sepolia-faucet.lisk.com/))
+
+### Local Development
+
+1. **Clone and Setup**
+   ```bash
+   git clone <repository>
+   cd artcrate/contracts
+   forge install
+   ```
+
+2. **Run Tests**
+   ```bash
+   forge test
+   ```
+
+3. **Deploy to Testnet**
+   ```bash
+   # Setup environment
+   cp .env.example .env
+   # Add your private key to .env
+
+   # Deploy
+   forge script script/DeployArtPlatform.s.sol:DeployArtPlatform --rpc-url https://rpc.sepolia-api.lisk.com --broadcast
+   ```
+
+## Testing
+
+Run the comprehensive test suite:
+
+```bash
+forge test
+```
+
+## Contract Functions
+
+### Public Functions
+
+#### NFT Functions
+- `mintNFT(string metadataURI)` - Mint NFT and earn tokens
+- `nftBalanceOf(address owner)` - Get NFT balance
+- `nftTotalSupply()` - Get total NFTs minted
+
+#### Token Functions
+- `tokenBalanceOf(address account)` - Get token balance
+- `tokenTransfer(address to, uint256 amount)` - Transfer tokens
+- `tokenTotalSupply()` - Get total token supply
+
+### Owner Functions
+- `setRewardAmount(uint256 newAmount)` - Update reward per mint
+- `rewardCreator(address to, uint256 amount)` - Manual token reward
+- `pause()` / `unpause()` - Emergency controls
+
+## Foundry Commands
 
 ### Build
-
 ```shell
-$ forge build
+forge build
 ```
 
 ### Test
-
 ```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
+forge test
 ```
 
 ### Deploy
-
 ```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+./deploy-simple.sh
 ```
 
-### Cast
-
+### Format
 ```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+forge fmt
 ```
