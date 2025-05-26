@@ -99,7 +99,7 @@ npm install
 ### Run the App
 
 ```bash
-npm run dev
+npm start
 ```
 
 ---
