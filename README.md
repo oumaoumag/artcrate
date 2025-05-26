@@ -1,6 +1,6 @@
 # 🎨 ArtCrate - NFT Platform with Creator Rewards
 
-A production-ready decentralized NFT platform built on Lisk Sepolia where creators earn tokens when users mint their NFTs. Built with modern Web3 technologies and best practices.
+A Decentralized NFT platform built on Lisk Sepolia where creators earn tokens when users mint their NFTs. Built with modern Web3 technologies and best practices.
 
 ## 🚀 Live Deployment
 
