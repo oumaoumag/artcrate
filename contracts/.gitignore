@@ -1,3 +1,11 @@
+# ===================================
+# ArtCrate Smart Contracts
+# ===================================
+
+# ===================================
+# Foundry/Forge Artifacts
+# ===================================
+
 # Compiler files
 cache/
 out/
@@ -7,8 +15,119 @@ out/
 /broadcast/*/31337/
 /broadcast/**/dry-run/
 
-# Docs
-docs/
+# Gas snapshots
+.gas-snapshot
 
-# Dotenv file
+# ===================================
+# Environment & Secrets
+# ===================================
+
+# Environment variables
 .env
+.env.local
+.env.development
+.env.production
+
+# Private keys (NEVER commit these!)
+*.key
+*.pem
+private-keys/
+.secrets
+
+# ===================================
+# Node.js Dependencies
+# ===================================
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# ===================================
+# Development & Testing
+# ===================================
+
+# Coverage reports
+coverage/
+coverage.json
+lcov.info
+
+# Test artifacts
+test-results/
+.coverage_artifacts/
+.coverage_cache/
+
+# Slither analysis
+slither-report.json
+slither.db.json
+
+# Mythril analysis
+mythril-report.json
+
+# ===================================
+# Documentation
+# ===================================
+
+# Auto-generated docs
+docs/
+natspec/
+
+# ===================================
+# IDE & Editor Files
+# ===================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim
+*.swp
+*.swo
+
+# ===================================
+# Operating System
+# ===================================
+
+# macOS
+.DS_Store
+._*
+
+# Windows
+Thumbs.db
+*.stackdump
+
+# Linux
+*~
+
+# ===================================
+# Temporary Files
+# ===================================
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# ===================================
+# Deployment Artifacts
+# ===================================
+
+# Keep production deployments but ignore local ones
+deployments/localhost/
+deployments/hardhat/
+deployments/ganache/
+
+# Verification artifacts
+verification/
+etherscan/

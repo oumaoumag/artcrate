@@ -1,3 +1,11 @@
+# ===================================
+# ArtCrate Web3 NFT Platform
+# ===================================
+
+# ===================================
+# Node.js & Package Managers
+# ===================================
+
 # Logs
 logs
 *.log
@@ -72,12 +80,34 @@ web_modules/
 # Yarn Integrity file
 .yarn-integrity
 
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# ===================================
+# Environment Variables & Secrets
+# ===================================
+
 # dotenv environment variable files
 .env
 .env.development.local
 .env.test.local
 .env.production.local
 .env.local
+
+# Private keys and sensitive data
+*.key
+*.pem
+private-keys/
+secrets/
+.secrets
+
+# ===================================
+# Build & Distribution
+# ===================================
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -102,7 +132,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # vitepress build output
 **/.vitepress/dist
@@ -112,6 +141,41 @@ dist
 
 # Docusaurus cache and generated files
 .docusaurus
+
+# ===================================
+# Web3 & Blockchain Specific
+# ===================================
+
+# Foundry/Forge artifacts
+contracts/cache/
+contracts/out/
+contracts/broadcast/*/31337/
+contracts/broadcast/**/dry-run/
+
+# Hardhat artifacts
+artifacts/
+cache/
+typechain/
+typechain-types/
+
+# Truffle artifacts
+build/
+
+# Deployment artifacts (keep production deployments)
+deployments/localhost/
+deployments/hardhat/
+deployments/ganache/
+
+# Gas reports
+gas-report.txt
+.gas-snapshot
+
+# Slither analysis
+slither-report.json
+
+# ===================================
+# Development Tools
+# ===================================
 
 # Serverless directories
 .serverless/
@@ -128,9 +192,122 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# yarn v2
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
+# ===================================
+# Operating System
+# ===================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===================================
+# IDEs & Editors
+# ===================================
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===================================
+# Temporary & Backup Files
+# ===================================
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+
+# Archive files (unless specifically needed)
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ===================================
+# Project Specific
+# ===================================
+
+# Frontend build artifacts
+frontend/build/
+frontend/dist/
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Test artifacts
+test-results/
+coverage-reports/
+
+# Local development databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Local configuration overrides
+config.local.json
+settings.local.json
