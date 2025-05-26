@@ -104,13 +104,6 @@ npm run dev
 
 ---
 
-## 🌍 Deployment
-
-* **Contracts** deployed on: `Lisk Sepolia`
-* **Frontend** hosted on: \[Netlify/Vercel link]
-
----
-
 ## 📄 License
 
 MIT License. See `LICENSE` file for details.
