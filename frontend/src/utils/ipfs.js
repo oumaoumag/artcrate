@@ -37,25 +37,26 @@ export const uploadToIPFS = async (file, metadata) => {
 // Upload metadata to IPFS - using simple hash for demo
 export const uploadMetadataToIPFS = async (metadata) => {
   try {
-    // Create a simple hash instead of data URL to avoid transaction size limits
-    const mockHash = `Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+   const reponse = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      pinata_api_key: IPFS_CONFIG.apiKey,
+      pinata_secret_api_key: IPFS_CONFIG.secretKey,
+    },
+    body: JSON.stringify(metadata),
+   });
 
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+   if (!response.ok) {
+    throw new Error(`Metadata upload failed: ${reponse.statusText}`);
+   }
 
-    // Store metadata in localStorage for retrieval
-    const metadataJson = JSON.stringify(metadata);
-    localStorage.setItem(`metadata_${mockHash}`, metadataJson);
-
-    // Use a simple IPFS-style URL instead of data URL
-    const ipfsUrl = `https://ipfs.io/ipfs/${mockHash}`;
-
-    return {
-      success: true,
-      hash: mockHash,
-      url: ipfsUrl,
-      metadata: metadata,
-    };
+   const data = await reponse.json();
+   return {
+    success: true,
+    hash: data.IpfsHash,
+    url: `${IPFS_CONFIG.gateway}${data.IpfsHash}`,
+   };
   } catch (error) {
     console.error('Metadata upload error:', error);
     return {
