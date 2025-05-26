@@ -3,18 +3,17 @@ import { IPFS_CONFIG } from '../config/contracts';
 // Simple IPFS upload function - using data URLs for demo
 export const uploadToIPFS = async (file, metadata) => {
   try {
-    // Convert file to data URL for immediate display
-    const dataUrl = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
+   const formData =new FormData();
+   formData.append('file', file);
 
-    // Create a mock hash for the filename
-    const mockHash = `Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+   const response = await fetch(IPFS_CONFIG.uploadEndpoint, {
+    method: 'POST',
+    headers: {
+      pinata_api_key: IPFS_CONFIG.apiKey,
+      pinata_secret_api_key: IPFS_CONFIG.secretKey,
+    },
+    body: formData,
+   });
 
     return {
       success: true,
