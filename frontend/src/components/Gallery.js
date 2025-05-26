@@ -71,7 +71,7 @@ const NFTCard = ({ nft }) => {
                             </div>
                         )}
                         <img
-                            src={nft.image}
+                            src={nft.image.startsWith('data') ? nft.image : `https://ipfs.io/ipfs/${nft.image}`}
                             alt={nft.title}
                             style={{
                                 width: '100%',
