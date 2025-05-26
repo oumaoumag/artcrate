@@ -425,13 +425,16 @@ export const Web3Provider = ({ children }) => {
             reward: 10,
         };
 
-        // Store in localStorage for persistence
+        // Update localStorage
         const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
         const updatedNFTs = [nftData, ...existingNFTs.filter(nft => nft.id !== tokenId.toString())];
         localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
 
         // Add to state
-        addMintedNFT(nftData);
+        // addMintedNFT(nftData);
+
+        // Force state update
+        setMintedNFTs(prev => [nftData, ...prev]);
 
         return nftData;
     };
