@@ -78,18 +78,18 @@ Built with React + ethers.js:
 ```bash
 git clone https://github.com/oumaoumag/artcrate.git
 cd artcrate
-````
+```
 
 ### Install Dependencies
 
 ```bash
 # Install smart contract tools
 cd contracts
-npm install
+forge install
 
-# Compile & deploy contracts (e.g., using Hardhat)
-npx hardhat compile
-npx hardhat run scripts/deploy.js --network liskSepolia
+# Compile & deploy contracts (using Foundry)
+forge build
+forge script scripts/deploy.js --rpc-url liskSepolia
 
 # Install frontend
 cd ../frontend
