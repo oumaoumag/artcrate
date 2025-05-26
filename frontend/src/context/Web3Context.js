@@ -78,8 +78,8 @@ export const Web3Provider = ({ children }) => {
     const handleChainChanged = (chainId) => {
         setChainId(chainId);
         checkNetwork(chainId);
-        // Reload the page to reset the dapp state
-        window.location.reload();
+
+        window.location.reload(); 
     };
 
     // Check if on correct network
@@ -190,15 +190,18 @@ export const Web3Provider = ({ children }) => {
 
     // Load user's NFTs from localStorage and contract
     const loadUserNFTs = async (contractInstance, userAddress) => {
+        console.log('Starting NFT load from contract');
         try {
-            // First, load from localStorage for immediate display
+            
+            // Load from localStorage for immediate display
             const localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
             if (localNFTs.length > 0) {
                 setMintedNFTs(localNFTs);
             }
 
-            // Then load from contract for verification
+            // Load from contract for verification
             const nftBalance = await contractInstance.nftBalanceOf(userAddress);
+            console.log('NFT balance from contract:', nftBalance.toString());
             const nfts = [];
 
             for (let i = 0; i < nftBalance.toNumber(); i++) {
@@ -207,7 +210,7 @@ export const Web3Provider = ({ children }) => {
                     const tokenURI = await contractInstance.tokenURI(tokenId);
                     const creator = await contractInstance.creators(tokenId);
 
-                    // Check if we have this NFT in localStorage first
+                    // Check if this NFT in localStorage first
                     const localNFT = localNFTs.find(nft => nft.id === tokenId.toString());
                     if (localNFT) {
                         nfts.push(localNFT);
@@ -273,6 +276,7 @@ export const Web3Provider = ({ children }) => {
 
             // Update localStorage with contract data
             localStorage.setItem('userNFTs', JSON.stringify(nfts));
+            console.log('Processed NFTs:', nfts)
             setMintedNFTs(nfts);
         } catch (error) {
             console.error('Error loading user NFTs:', error);
@@ -409,6 +413,7 @@ export const Web3Provider = ({ children }) => {
 
     // Store NFT data locally for immediate display
     const storeNFTLocally = (tokenId, metadata, creator) => {
+        
         const nftData = {
             id: tokenId.toString(),
             title: metadata.name || `NFT #${tokenId}`,
