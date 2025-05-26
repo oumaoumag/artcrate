@@ -413,12 +413,13 @@ export const Web3Provider = ({ children }) => {
 
     // Store NFT data locally for immediate display
     const storeNFTLocally = (tokenId, metadata, creator) => {
-        
+        const imageUrl = metadata.image || '';
+
         const nftData = {
             id: tokenId.toString(),
             title: metadata.name || `NFT #${tokenId}`,
             description: metadata.description || '',
-            image: metadata.image || '',
+            image:imageUrl,
             creator: creator,
             timestamp: new Date().toISOString(),
             reward: 10,
