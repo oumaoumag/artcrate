@@ -43,7 +43,7 @@ export const uploadMetadataToIPFS = async (metadata) => {
     body: JSON.stringify(metadata),
    });
 
-   if (!response.ok) {
+   if (!reponse.ok) {
     throw new Error(`Metadata upload failed: ${reponse.statusText}`);
    }
 
@@ -55,10 +55,7 @@ export const uploadMetadataToIPFS = async (metadata) => {
    };
   } catch (error) {
     console.error('Metadata upload error:', error);
-    return {
-      success: false,
-      error: error.message,
-    };
+    return {success: false, error: error.message };
   }
 };
 
