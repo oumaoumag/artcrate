@@ -1,6 +1,6 @@
 import { IPFS_CONFIG } from '../config/contracts';
 
-// Simple IPFS upload function - using data URLs for demo
+// IPFS upload function
 export const uploadToIPFS = async (file, metadata) => {
   try {
    const formData =new FormData();
