@@ -1,7 +1,7 @@
 import { IPFS_CONFIG } from '../config/contracts';
 
 // IPFS upload function
-export const uploadToIPFS = async (file, metadata) => {
+export const uploadToIPFS = async (file) => {
   try {
    const formData =new FormData();
    formData.append('file', file);
@@ -21,16 +21,12 @@ export const uploadToIPFS = async (file, metadata) => {
    const data = await response.json();
     return {
       success: true,
-      hash: mockHash,
-      url: data.IpfsHash, 
-      dataUrl: `${IPFS_CONFIG.gateway}${data.IpfsHash}`,
+      hash: data.IpfsHash, 
+      url: `${IPFS_CONFIG.gateway}${data.IpfsHash}`,
     };
   } catch (error) {
     console.error('IPFS upload error:', error);
-    return {
-      success: false,
-      error: error.message,
-    };
+    return { success: false, error: error.message };
   }
 };
 
