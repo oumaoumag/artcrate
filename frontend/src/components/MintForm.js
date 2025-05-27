@@ -50,6 +50,8 @@ const MintForm = () => {
     });
     const [isMinting, setIsMinting] = useState(false);
     const [preview, setPreview] = useState(null);
+    const [uploadProgress, setUploadProgress] = useState('');
+
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
