@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { CONTRACTS, NETWORKS } from '../config/contracts';
 import ArtPlatformABI from '../abi/ArtPlatform.json';
@@ -25,96 +25,14 @@ export const Web3Provider = ({ children }) => {
     const [chainId, setChainId] = useState(null);
     const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
 
-    // Initialize provider on component mount
-    useEffect(() => {
-        if (window.ethereum) {
-            const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-            setProvider(web3Provider);
-
-            // Check if already connected
-            checkConnection();
-
-            // Listen for account changes
-            window.ethereum.on('accountsChanged', handleAccountsChanged);
-            window.ethereum.on('chainChanged', handleChainChanged);
-
-            return () => {
-                window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-                window.ethereum.removeListener('chainChanged', handleChainChanged);
-            };
-        }
-    }, []);
-
-    // Check if wallet is already connected
-    const checkConnection = async () => {
-        try {
-            if (window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
-                    await connectWallet();
-                }
-            }
-        } catch (error) {
-            console.error('Error checking connection:', error);
-        }
-    };
-
-    // Handle account changes
-    const handleAccountsChanged = (accounts) => {
-        if (accounts.length === 0) {
-            // User disconnected
-            setAccount(null);
-            setBalance('0');
-            setTokenBalance('0');
-            setContract(null);
-            setSigner(null);
-        } else {
-            // Account changed
-            connectWallet();
-        }
-    };
-
-    // Handle chain changes
-    const handleChainChanged = (chainId) => {
-        setChainId(chainId);
-        checkNetwork(chainId);
-
-        window.location.reload(); 
-    };
-
     // Check if on correct network
-    const checkNetwork = (currentChainId) => {
+    const checkNetwork = useCallback((currentChainId) => {
         const targetChainId = NETWORKS.LISK_SEPOLIA.chainId;
         setIsCorrectNetwork(currentChainId === targetChainId);
-    };
+    }, []);
 
-    // Switch to Lisk Sepolia network
-    const switchToLiskSepolia = async () => {
-        try {
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: NETWORKS.LISK_SEPOLIA.chainId }],
-            });
-        } catch (switchError) {
-            // This error code indicates that the chain has not been added to MetaMask
-            if (switchError.code === 4902) {
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [NETWORKS.LISK_SEPOLIA],
-                    });
-                } catch (addError) {
-                    console.error('Error adding network:', addError);
-                    throw addError;
-                }
-            } else {
-                console.error('Error switching network:', switchError);
-                throw switchError;
-            }
-        }
-    };
-
-    const connectWallet = async () => {
+    // Memoize the connectWallet function
+    const connectWallet = useCallback(async () => {
         if (!window.ethereum) {
             alert('Please install MetaMask to use this application');
             return;
@@ -186,17 +104,104 @@ export const Web3Provider = ({ children }) => {
         } finally {
             setIsConnecting(false);
         }
-    };
+    }, [checkNetwork]);
+
+    // Switch to Lisk Sepolia network
+    const switchToLiskSepolia = useCallback(async () => {
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: NETWORKS.LISK_SEPOLIA.chainId }],
+            });
+        } catch (switchError) {
+            // This error code indicates that the chain has not been added to MetaMask
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [NETWORKS.LISK_SEPOLIA],
+                    });
+                } catch (addError) {
+                    console.error('Error adding network:', addError);
+                    throw addError;
+                }
+            } else {
+                console.error('Error switching network:', switchError);
+                throw switchError;
+            }
+        }
+    }, []);
+
+    // Memoize the checkConnection function
+    const checkConnection = useCallback(async () => {
+        try {
+            if (window.ethereum) {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    await connectWallet();
+                }
+            }
+        } catch (error) {
+            console.error('Error checking connection:', error);
+        }
+    }, [connectWallet]);
+
+    // Memoize the handleAccountsChanged function
+    const handleAccountsChanged = useCallback((accounts) => {
+        if (accounts.length === 0) {
+            // User disconnected
+            setAccount(null);
+            setBalance('0');
+            setTokenBalance('0');
+            setContract(null);
+            setSigner(null);
+        } else {
+            // Account changed
+            connectWallet();
+        }
+    }, [connectWallet]);
+
+    // Memoize the handleChainChanged function
+    const handleChainChanged = useCallback((chainId) => {
+        setChainId(chainId);
+        checkNetwork(chainId);
+        window.location.reload();
+    }, [checkNetwork]);
+
+    // Initialize provider on component mount with proper dependencies
+    useEffect(() => {
+        if (window.ethereum) {
+            const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+            setProvider(web3Provider);
+
+            // Check if already connected
+            checkConnection();
+
+            // Listen for account changes
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
+            window.ethereum.on('chainChanged', handleChainChanged);
+
+            return () => {
+                window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+                window.ethereum.removeListener('chainChanged', handleChainChanged);
+            };
+        }
+    }, [checkConnection, handleAccountsChanged, handleChainChanged]);
 
     // Load user's NFTs from localStorage and contract
-    const loadUserNFTs = async (contractInstance, userAddress) => {
+    const loadUserNFTs = useCallback(async (contractInstance, userAddress) => {
         console.log('Starting NFT load from contract');
         try {
             
             // Load from localStorage for immediate display
-            const localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
-            if (localNFTs.length > 0) {
-                setMintedNFTs(localNFTs);
+            let localNFTs = [];
+            try {
+                localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+                if (localNFTs.length > 0) {
+                    setMintedNFTs(localNFTs);
+                }
+            } catch (localError) {
+                console.warn('Error loading from localStorage:', localError);
             }
 
             // Load from contract for verification
@@ -204,7 +209,10 @@ export const Web3Provider = ({ children }) => {
             console.log('NFT balance from contract:', nftBalance.toString());
             const nfts = [];
 
-            for (let i = 0; i < nftBalance.toNumber(); i++) {
+            // Limit the number of NFTs to process to avoid storage issues
+            const maxNFTsToProcess = Math.min(nftBalance.toNumber(), 20); // Process max 20 NFTs
+
+            for (let i = 0; i < maxNFTsToProcess; i++) {
                 try {
                     const tokenId = await contractInstance.tokenOfOwnerByIndex(userAddress, i);
                     const tokenURI = await contractInstance.tokenURI(tokenId);
@@ -274,14 +282,37 @@ export const Web3Provider = ({ children }) => {
                 }
             }
 
-            // Update localStorage with contract data
-            localStorage.setItem('userNFTs', JSON.stringify(nfts));
-            console.log('Processed NFTs:', nfts)
+            // Update localStorage with contract data - with safety check for quota
+            try {
+                const nftsString = JSON.stringify(nfts);
+                // Check if the string is too large (over 4MB)
+                if (nftsString.length < 4000000) {
+                    localStorage.setItem('userNFTs', nftsString);
+                } else {
+                    // If too large, store a smaller subset
+                    const smallerSet = nfts.slice(0, 10);
+                    localStorage.setItem('userNFTs', JSON.stringify(smallerSet));
+                    console.warn('NFT data too large for localStorage, storing subset');
+                }
+            } catch (storageError) {
+                console.warn('Failed to store NFTs in localStorage:', storageError);
+                // Clear some space by removing old items
+                try {
+                    localStorage.removeItem('userNFTs');
+                    // Try to store a smaller subset
+                    const smallerSet = nfts.slice(0, 5);
+                    localStorage.setItem('userNFTs', JSON.stringify(smallerSet));
+                } catch (e) {
+                    console.error('Could not store even a subset of NFTs');
+                }
+            }
+
+            console.log('Processed NFTs:', nfts.length);
             setMintedNFTs(nfts);
         } catch (error) {
             console.error('Error loading user NFTs:', error);
         }
-    };
+    }, []);
 
     // Mint NFT function
     const mintNFT = async (metadataURI) => {
