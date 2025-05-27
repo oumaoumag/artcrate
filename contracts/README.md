@@ -4,9 +4,13 @@ A production-ready NFT platform smart contract that combines ERC721 NFTs with cu
 
 ## 🚀 Live Deployment
 
-**Contract Address:** `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
-**Network:** Lisk Sepolia Testnet
-**Explorer:** [View on Blockscout](https://sepolia-blockscout.lisk.com/address/0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8)
+**Smart Contract**: `0xC11a4C0bbC828173FB39909C0E81e9251b07B880`
+  **Smart Contract-v1** `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
+
+**Network**: Lisk Sepolia Testnet
+
+**Explorer**: [View Contract on Blockscout](https://sepolia-blockscout.lisk.com/address/0xC11a4C0bbC828173FB39909C0E81e9251b07B880)
+**V1-Explorer:** [View on Blockscout](https://sepolia-blockscout.lisk.com/address/0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8)
 
 ## ✨ Features
 
