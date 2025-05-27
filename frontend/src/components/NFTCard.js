@@ -7,9 +7,9 @@ const NFTCard = ({ nft }) => {
     const { account } = useWeb3();
     const [showTransferModal, setShowTransferModal] = useState(false);
     
-    // Check if the current user is the owner (simplified check)
-    const isOwner = true; 
-    
+    // Check if the current user is the owner
+    const isOwner = account && account.toLowerCase() === nft.owner?.toLowerCase();    
+
     return (
         <div style={{
             background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(234, 88, 12, 0.3))',
