@@ -68,12 +68,14 @@ const MintForm = () => {
         if (!account || !formData.title || !formData.image || !isCorrectNetwork) return;
 
         setIsMinting(true);
+        setUploadProgress('');
 
         try {
-            // Upload image to IPFS (mock implementation)
-            const imageUpload = await uploadToIPFS(formData.image);
+            // Upload image to IPFS with progress tracking
+            const imageUpload = await uploadToIPFS(formData.image, setUploadProgress);
             if (!imageUpload.success) throw new Error('Failed to upload image to IPFS');
 
+            setUploadProgress('Creating metadata...');
             // Create and upload metadata
             const metadata = createNFTMetadata(
                 formData.title,
@@ -81,9 +83,12 @@ const MintForm = () => {
                 imageUpload.url, 
                 account
             );
+            
+            setUploadProgress('Uploading metadata to IPFS...');
             const metadataUpload = await uploadMetadataToIPFS(metadata);
             if (!metadataUpload.success) throw new Error('Failed to upload metadata to IPFS');
             
+            setUploadProgress('Minting NFT on blockchain...');
             // Mint NFT
             const receipt = await mintNFT(metadataUpload.url);
             console.log('NFT minted successfully:', receipt);
@@ -91,9 +96,11 @@ const MintForm = () => {
             // Reset form
             setFormData({ title: '', description: '', image: null });
             setPreview(null);
+            setUploadProgress('');
             alert('NFT minted successfully! You earned 10 CTK tokens.');
         } catch (error) {
             console.error('Minting error:', error);
+            setUploadProgress(`Error: ${error.message}`);
             alert(`Failed to mint NFT: ${error.message}`);
         } finally {
             setIsMinting(false);
@@ -197,6 +204,33 @@ const MintForm = () => {
                         </label>
                     </div>
                 </div>
+
+                {uploadProgress && (
+                    <div style={{ 
+                        marginBottom: '1rem', 
+                        color: uploadProgress.includes('Error') ? '#ef4444' : '#4ade80',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.75rem',
+                        background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '8px'
+                    }}>
+                        {uploadProgress.includes('Error') ? (
+                            <span>⚠️</span>
+                        ) : (
+                            <div style={{
+                                width: '16px',
+                                height: '16px',
+                                border: '2px solid #4ade80',
+                                borderTop: '2px solid transparent',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite'
+                            }}></div>
+                        )}
+                        <span>{uploadProgress}</span>
+                    </div>
+                )}
 
                 <button
                     type="submit"
