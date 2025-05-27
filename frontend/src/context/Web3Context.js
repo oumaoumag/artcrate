@@ -365,7 +365,7 @@ export const Web3Provider = ({ children }) => {
         try {
             // Call the transferFrom function on the NFT contract
             const tx = await contract.transferFrom(account, to, tokenId, {
-                gasLimit: 200000, // Conservative gas limit
+                gasLimit: 200000,
             });
             const receipt = await tx.wait();
 
