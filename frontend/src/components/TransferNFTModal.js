@@ -80,3 +80,32 @@ const modalStyles = {
         flex: 1,
     },
 };
+
+const TransferNFTModal = ({ nft, onClose }) => {
+    const { transferNFT } = useWeb3();
+    const [recipient, setRecipient] = useState('');
+    const [isTransferring, setIsTransferring] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleTransfer = async () => {
+        if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
+            setError('Please enter a valid Ethereum address');
+            return;
+        }
+
+        setError('');
+        setIsTransferring(true);
+
+        try {
+            await transferNFT(recipient, nft.id);
+            alert(`NFT #${nft.id} successfully transferred to ${recipient}`);
+            onClose();
+        } catch (error) {
+            console.error('Transfer error:', error);
+            setError(error.message || 'Failed to transfer NFT');
+        } finally {
+            setIsTransferring(false);
+        }
+    };
+
+    
