@@ -203,8 +203,8 @@ export const Web3Provider = ({ children }) => {
             console.log('NFT balance from contract:', nftBalance.toString());
             const nfts = [];
 
-            // Limit the number of NFTs to process to avoid storage issues
-            const maxNFTsToProcess = Math.min(nftBalance.toNumber(), 20); // Process max 20 NFTs
+            // Limit to a reasonable number to prevent quota issues
+            const maxItems = Math.min(nftBalance.toNumber(), 5);
 
             for (let i = 0; i < maxNFTsToProcess; i++) {
                 try {
