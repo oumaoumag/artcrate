@@ -4,7 +4,7 @@ import { IPFS_CONFIG } from '../config/contracts';
 export const uploadToIPFS = async (file, setProgress = () => {}) => {
   setProgress('Uploading image...');
   try {
-   const formData =new FormData();
+   const formData = new FormData();
    formData.append('file', file);
 
    const response = await fetch(IPFS_CONFIG.uploadEndpoint, {
@@ -17,17 +17,18 @@ export const uploadToIPFS = async (file, setProgress = () => {}) => {
    });
 
    if (!response.ok) {
-    throw new Error(`IPFS upload failed: ${ReportingObserver.statusText}`);
+    throw new Error(`IPFS upload failed: ${response.statusText}`);
    }
    const data = await response.json();
-    return {
+   setProgress('Image uploaded successfully');
+   return {
       success: true,
       hash: data.IpfsHash, 
       url: `${IPFS_CONFIG.gateway}${data.IpfsHash}`,
     };
   } catch (error) {
     console.error('IPFS upload error:', error);
-    setProgress('Image uploaded Successfully');
+    setProgress(`Upload failed: ${error.message}`);
     return { success: false, error: error.message };
   }
 };
