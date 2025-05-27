@@ -192,16 +192,10 @@ export const Web3Provider = ({ children }) => {
     const loadUserNFTs = useCallback(async (contractInstance, userAddress) => {
         console.log('Starting NFT load from contract');
         try {
-            
-            // Load from localStorage for immediate display
-            let localNFTs = [];
-            try {
-                localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
-                if (localNFTs.length > 0) {
-                    setMintedNFTs(localNFTs);
-                }
-            } catch (localError) {
-                console.warn('Error loading from localStorage:', localError);
+            // Load from localStorage for immediate display (limit to 5 items)
+            const localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]').slice(0, 5);
+            if (localNFTs.length > 0) {
+                setMintedNFTs(localNFTs);
             }
 
             // Load from contract for verification
