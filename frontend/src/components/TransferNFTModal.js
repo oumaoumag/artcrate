@@ -108,4 +108,77 @@ const TransferNFTModal = ({ nft, onClose }) => {
         }
     };
 
-    
+    return (
+        <div style={modalStyles.overlay} onClick={onClose}>
+            <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
+                <button style={modalStyles.closeButton} onClick={onClose}>
+                    <X size={24} />
+                </button>
+
+                <h3 style={{ color: '#fde047', marginBottom: '1.5rem', textAlign: 'center' }}>
+                    Transfer NFT
+                </h3>
+
+                <div style={modalStyles.nftPreview}>
+                    <img 
+                        src={nft.image || 'https://via.placeholder.com/60?text=NFT'} 
+                        alt={nft.title}
+                        style={modalStyles.nftImage}
+                    />
+                    <div style={modalStyles.nftInfo}>
+                        <div style={{ color: '#fde047', fontWeight: 'bold' }}>{nft.title}</div>
+                        <div style={{ color: '#fdba74', fontSize: '0.875rem' }}>ID: {nft.id}</div>
+                    </div>
+                </div>
+
+                <label style={{ color: '#fdba74', display: 'block', marginBottom: '0.5rem' }}>
+                    Recipient Address
+                </label>
+                <input
+                    type="text"
+                    placeholder="0x..."
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    style={modalStyles.input}
+                />
+
+                {error && (
+                    <div style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '0.875rem' }}>
+                        {error}
+                    </div>
+                )}
+
+                <button
+                    onClick={handleTransfer}
+                    disabled={isTransferring}
+                    style={{
+                        ...modalStyles.button,
+                        opacity: isTransferring ? 0.7 : 1,
+                        cursor: isTransferring ? 'not-allowed' : 'pointer',
+                    }}
+                >
+                    {isTransferring ? (
+                        <>
+                            <div style={{
+                                width: '20px',
+                                height: '20px',
+                                border: '2px solid #581c87',
+                                borderTop: '2px solid transparent',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite'
+                            }}></div>
+                            <span>Transferring...</span>
+                        </>
+                    ) : (
+                        <>
+                            <Send size={20} />
+                            <span>Transfer NFT</span>
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default TransferNFTModal;
