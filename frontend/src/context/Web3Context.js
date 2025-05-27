@@ -415,11 +415,18 @@ export const Web3Provider = ({ children }) => {
     const storeNFTLocally = (tokenId, metadata, creator) => {
         const imageUrl = metadata.image || '';
 
+        // Store metadata by IPFS hash for future reference
+        const hashMatch = imageUrl.match(/Qm[a-zA-Z0-9]+/);
+        if (hashMatch) {
+            const hash = hashMatch[0];
+            localStorage.setItem(`metadata_${hash}`, JSON.stringify(metadata));
+        }
+
         const nftData = {
             id: tokenId.toString(),
             title: metadata.name || `NFT #${tokenId}`,
             description: metadata.description || '',
-            image:imageUrl,
+            image: imageUrl,
             creator: creator,
             timestamp: new Date().toISOString(),
             reward: 10,
@@ -429,9 +436,6 @@ export const Web3Provider = ({ children }) => {
         const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
         const updatedNFTs = [nftData, ...existingNFTs.filter(nft => nft.id !== tokenId.toString())];
         localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
-
-        // Add to state
-        // addMintedNFT(nftData);
 
         // Force state update
         setMintedNFTs(prev => [nftData, ...prev]);
