@@ -70,34 +70,26 @@ const MintForm = () => {
         try {
             // Upload image to IPFS (mock implementation)
             const imageUpload = await uploadToIPFS(formData.image);
-            if (!imageUpload.success) {
-                throw new Error('Failed to upload image to IPFS');
-            }
+            if (!imageUpload.success) throw new Error('Failed to upload image to IPFS');
 
             // Create and upload metadata
             const metadata = createNFTMetadata(
                 formData.title,
                 formData.description,
-                imageUpload.url, // Use the actual image URL instead of hash
+                imageUpload.url, 
                 account
             );
-
             const metadataUpload = await uploadMetadataToIPFS(metadata);
-            if (!metadataUpload.success) {
-                throw new Error('Failed to upload metadata to IPFS');
-            }
-
-            // Call the smart contract mint function
+            if (!metadataUpload.success) throw new Error('Failed to upload metadata to IPFS');
+            
+            // Mint NFT
             const receipt = await mintNFT(metadataUpload.url);
-
             console.log('NFT minted successfully:', receipt);
 
             // Reset form
             setFormData({ title: '', description: '', image: null });
             setPreview(null);
-
             alert('NFT minted successfully! You earned 10 CTK tokens.');
-
         } catch (error) {
             console.error('Minting error:', error);
             alert(`Failed to mint NFT: ${error.message}`);
