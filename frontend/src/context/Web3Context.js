@@ -206,23 +206,20 @@ export const Web3Provider = ({ children }) => {
             // Limit to a reasonable number to prevent quota issues
             const maxItems = Math.min(nftBalance.toNumber(), 5);
 
-            for (let i = 0; i < maxNFTsToProcess; i++) {
+            for (let i = 0; i < maxItems; i++) {
                 try {
                     const tokenId = await contractInstance.tokenOfOwnerByIndex(userAddress, i);
                     const tokenURI = await contractInstance.tokenURI(tokenId);
                     const creator = await contractInstance.creators(tokenId);
 
-                    // Check if this NFT in localStorage first
                     const localNFT = localNFTs.find(nft => nft.id === tokenId.toString());
                     if (localNFT) {
                         nfts.push(localNFT);
                         continue;
                     }
 
-                    // Fetch metadata from localStorage or fallback
                     let metadata = {};
                     try {
-                        // Try to get from localStorage first
                         const hashMatch = tokenURI.match(/Qm[a-zA-Z0-9]+/);
                         if (hashMatch) {
                             const hash = hashMatch[0];
@@ -230,7 +227,6 @@ export const Web3Provider = ({ children }) => {
                             if (stored) {
                                 metadata = JSON.parse(stored);
                             } else {
-                                // Fallback for IPFS URLs we can't fetch
                                 metadata = {
                                     name: `NFT #${tokenId}`,
                                     description: 'IPFS metadata (not cached)',
@@ -238,12 +234,10 @@ export const Web3Provider = ({ children }) => {
                                 };
                             }
                         } else if (tokenURI.startsWith('data:application/json;base64,')) {
-                            // Decode data URL
                             const base64Data = tokenURI.split(',')[1];
                             const jsonString = atob(base64Data);
                             metadata = JSON.parse(jsonString);
                         } else {
-                            // Simple string URI
                             metadata = {
                                 name: `NFT #${tokenId}`,
                                 description: tokenURI,
@@ -276,33 +270,26 @@ export const Web3Provider = ({ children }) => {
                 }
             }
 
-            // Update localStorage with contract data - with safety check for quota
+            // Store only essential data and limit to 5 items
+            const slimNFTs = nfts.map(nft => ({
+                id: nft.id,
+                title: nft.title,
+                image: nft.image,
+                creator: nft.creator,
+                timestamp: nft.timestamp,
+                reward: nft.reward,
+            }));
+
             try {
-                const nftsString = JSON.stringify(nfts);
-                // Check if the string is too large (over 4MB)
-                if (nftsString.length < 4000000) {
-                    localStorage.setItem('userNFTs', nftsString);
-                } else {
-                    // If too large, store a smaller subset
-                    const smallerSet = nfts.slice(0, 10);
-                    localStorage.setItem('userNFTs', JSON.stringify(smallerSet));
-                    console.warn('NFT data too large for localStorage, storing subset');
-                }
+                localStorage.setItem('userNFTs', JSON.stringify(slimNFTs));
             } catch (storageError) {
-                console.warn('Failed to store NFTs in localStorage:', storageError);
-                // Clear some space by removing old items
-                try {
-                    localStorage.removeItem('userNFTs');
-                    // Try to store a smaller subset
-                    const smallerSet = nfts.slice(0, 5);
-                    localStorage.setItem('userNFTs', JSON.stringify(smallerSet));
-                } catch (e) {
-                    console.error('Could not store even a subset of NFTs');
-                }
+                console.warn('Failed to update localStorage, clearing old data:', storageError);
+                localStorage.removeItem('userNFTs');
+                localStorage.setItem('userNFTs', JSON.stringify(slimNFTs.slice(0, 2))); // Fallback to 2 items
             }
 
             console.log('Processed NFTs:', nfts.length);
-            setMintedNFTs(nfts);
+            setMintedNFTs(slimNFTs);
         } catch (error) {
             console.error('Error loading user NFTs:', error);
         }
