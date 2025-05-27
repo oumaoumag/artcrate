@@ -1,16 +1,17 @@
 # 🎨 ArtCrate - NFT Platform with Creator Rewards
 
-A production-ready decentralized NFT platform built on Lisk Sepolia where creators earn tokens when users mint their NFTs. Built with modern Web3 technologies and best practices.
+A Decentralized NFT platform built on Lisk Sepolia where creators earn tokens when users mint their NFTs. Built with modern Web3 technologies and best practices.
 
 ## 🚀 Live Deployment
 
 **Frontend**: [https://artcrate-frontend-5ek5.vercel.app/](https://artcrate-frontend-5ek5.vercel.app/)
 
-**Smart Contract**: `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
+**Smart Contract**: `0xC11a4C0bbC828173FB39909C0E81e9251b07B880`
+  **Smart Contract-v1** `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
 
 **Network**: Lisk Sepolia Testnet
 
-**Explorer**: [View Contract](https://sepolia-blockscout.lisk.com/address/0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8)
+**Explorer**: [View Contract](https://sepolia-blockscout.lisk.com/address/0xC11a4C0bbC828173FB39909C0E81e9251b07B880)
 
 ---
 
@@ -78,18 +79,18 @@ Built with React + ethers.js:
 ```bash
 git clone https://github.com/oumaoumag/artcrate.git
 cd artcrate
-````
+```
 
 ### Install Dependencies
 
 ```bash
 # Install smart contract tools
 cd contracts
-npm install
+forge install
 
-# Compile & deploy contracts (e.g., using Hardhat)
-npx hardhat compile
-npx hardhat run scripts/deploy.js --network liskSepolia
+# Compile & deploy contracts (using Foundry)
+forge build
+forge script scripts/deploy.js --rpc-url liskSepolia
 
 # Install frontend
 cd ../frontend
@@ -99,7 +100,7 @@ npm install
 ### Run the App
 
 ```bash
-npm run dev
+npm start
 ```
 
 ---
