@@ -1,7 +1,8 @@
 import { IPFS_CONFIG } from '../config/contracts';
 
 // IPFS upload function
-export const uploadToIPFS = async (file) => {
+export const uploadToIPFS = async (file, setProgress = () => {}) => {
+  setProgress('Uploading image...');
   try {
    const formData =new FormData();
    formData.append('file', file);
@@ -26,6 +27,7 @@ export const uploadToIPFS = async (file) => {
     };
   } catch (error) {
     console.error('IPFS upload error:', error);
+    setProgress('Image uploaded Successfully');
     return { success: false, error: error.message };
   }
 };
