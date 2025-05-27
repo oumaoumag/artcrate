@@ -356,6 +356,29 @@ export const Web3Provider = ({ children }) => {
     }
     };
 
+    // Transfer NFT function
+    const transferNFT = async (to, tokenId) => {
+        if (!contract || !account) {
+            throw new Error('Wallet not connected or contract not initialized');
+        }
+
+        try {
+            // Call the transferFrom function on the NFT contract
+            const tx = await contract.transferFrom(account, to, tokenId, {
+                gasLimit: 200000, // Conservative gas limit
+            });
+            const receipt = await tx.wait();
+
+            // Update NFTs after transfer
+            await loadUserNFTs(contract, account);
+
+            return receipt;
+        } catch (error) {
+            console.error('Error transferring NFT:', error);
+            throw error;
+        }
+    };
+
     // Get contract info
     const getContractInfo = async () => {
         if (!contract) return null;
@@ -461,6 +484,7 @@ export const Web3Provider = ({ children }) => {
         switchToLiskSepolia,
         mintNFT,
         transferTokens,
+        transferNFT,
         getContractInfo,
         addMintedNFT,
         storeNFTLocally,
