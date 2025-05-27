@@ -5,8 +5,11 @@ A production-ready decentralized NFT platform built on Lisk Sepolia where creato
 ## 🚀 Live Deployment
 
 **Frontend**: [https://artcrate-frontend-5ek5.vercel.app/](https://artcrate-frontend-5ek5.vercel.app/)
+
 **Smart Contract**: `0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8`
+
 **Network**: Lisk Sepolia Testnet
+
 **Explorer**: [View Contract](https://sepolia-blockscout.lisk.com/address/0x8BFadD14aA52762CE38DAaeA3538Dcadf126d4D8)
 
 ---
@@ -98,13 +101,6 @@ npm install
 ```bash
 npm run dev
 ```
-
----
-
-## 🌍 Deployment
-
-* **Contracts** deployed on: `Lisk Sepolia`
-* **Frontend** hosted on: \[Netlify/Vercel link]
 
 ---
 
