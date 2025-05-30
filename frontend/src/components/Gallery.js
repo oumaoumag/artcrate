@@ -2,6 +2,34 @@ import React, { useState } from 'react';
 import { Image, Coins } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 
+// Helper function to handle different image URL formats
+const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return '';
+    
+    // If it's a data URL, return as is
+    if (imageUrl.startsWith('data:')) {
+        return imageUrl;
+    }
+    
+    // If it's already a full URL (including IPFS gateway)
+    if (imageUrl.startsWith('http')) {
+        return imageUrl;
+    }
+    
+    // If it's an IPFS URL with ipfs:// protocol
+    if (imageUrl.startsWith('ipfs://')) {
+        return imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    }
+    
+    // If it's just an IPFS hash
+    if (imageUrl.match(/^Qm[a-zA-Z0-9]+$/)) {
+        return `https://ipfs.io/ipfs/${imageUrl}`;
+    }
+    
+    // Default case - assume it's an IPFS hash or path
+    return `https://ipfs.io/ipfs/${imageUrl}`;
+};
+
 // Shared card styles
 const cardStyles = {
     background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(234, 88, 12, 0.5))',
@@ -71,7 +99,7 @@ const NFTCard = ({ nft }) => {
                             </div>
                         )}
                         <img
-                            src={nft.image.startsWith('data') ? nft.image : `https://ipfs.io/ipfs/${nft.image}`}
+                            src={getImageUrl(nft.image)}
                             alt={nft.title}
                             style={{
                                 width: '100%',
