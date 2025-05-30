@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Image, Coins } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
+import { NFTCard } from './NFTCard'
 
 // Helper function to handle different image URL formats
 const getImageUrl = (imageUrl) => {
@@ -41,137 +42,6 @@ const cardStyles = {
     marginBottom: '1.5rem'
 };
 
-// NFT Card component with error handling
-const NFTCard = ({ nft }) => {
-    const [imageError, setImageError] = useState(false);
-    const [imageLoading, setImageLoading] = useState(true);
-
-    const handleImageLoad = () => {
-        setImageLoading(false);
-    };
-
-    const handleImageError = () => {
-        setImageError(true);
-        setImageLoading(false);
-        console.warn('Failed to load image for NFT:', nft.id, nft.image);
-    };
-
-    return (
-        <div
-            style={{
-                background: 'rgba(0,0,0,0.3)',
-                borderRadius: '12px',
-                border: '1px solid rgba(250, 204, 21, 0.2)',
-                overflow: 'hidden',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(250, 204, 21, 0.5)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(250, 204, 21, 0.2)';
-                e.currentTarget.style.transform = 'translateY(0)';
-            }}
-        >
-            <div style={{ aspectRatio: '1', position: 'relative', overflow: 'hidden' }}>
-                {nft.image && !imageError ? (
-                    <>
-                        {imageLoading && (
-                            <div style={{
-                                position: 'absolute',
-                                inset: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'linear-gradient(135deg, #7c3aed, #ea580c)',
-                                zIndex: 1
-                            }}>
-                                <div style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    border: '3px solid rgba(255,255,255,0.3)',
-                                    borderTop: '3px solid white',
-                                    borderRadius: '50%',
-                                    animation: 'spin 1s linear infinite'
-                                }}></div>
-                            </div>
-                        )}
-                        <img
-                            src={getImageUrl(nft.image)}
-                            alt={nft.title}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                transition: 'transform 0.3s ease',
-                                opacity: imageLoading ? 0 : 1
-                            }}
-                            onLoad={handleImageLoad}
-                            onError={handleImageError}
-                            onMouseEnter={(e) => {
-                                if (!imageLoading) e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        />
-                    </>
-                ) : (
-                    <div style={{
-                        width: '100%',
-                        height: '100%',
-                        background: 'linear-gradient(135deg, #7c3aed, #ea580c)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
-                    }}>
-                        <Image size={64} color="rgba(255,255,255,0.5)" />
-                        {imageError && (
-                            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
-                                Failed to load
-                            </span>
-                        )}
-                    </div>
-                )}
-            </div>
-            <div style={{ padding: '1rem' }}>
-                <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.5rem', fontSize: '1rem' }}>
-                    {nft.title}
-                </h4>
-                {nft.description && (
-                    <p style={{
-                        color: '#fdba74',
-                        fontSize: '0.875rem',
-                        marginBottom: '0.75rem',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                    }}>
-                        {nft.description}
-                    </p>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{
-                        color: '#fdba74',
-                        fontSize: '0.875rem',
-                        fontFamily: 'monospace'
-                    }}>
-                        {nft.creator.slice(0, 6)}...{nft.creator.slice(-4)}
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#facc15' }}>
-                        <Coins size={12} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>+{nft.reward}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const Gallery = () => {
     const { mintedNFTs } = useWeb3();
