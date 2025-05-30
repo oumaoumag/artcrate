@@ -192,10 +192,52 @@ export const Web3Provider = ({ children }) => {
     const loadUserNFTs = useCallback(async (contractInstance, userAddress) => {
         console.log('Starting NFT load from contract');
         try {
-            // Load from localStorage for immediate display (limit to 5 items)
-            const localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]').slice(0, 5);
-            if (localNFTs.length > 0) {
-                setMintedNFTs(localNFTs);
+            // First check if we have any individually stored NFTs (fallback storage)
+            const individualNFTs = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('nft_')) {
+                    try {
+                        const nftData = JSON.parse(localStorage.getItem(key));
+                        if (nftData && nftData.id) {
+                            individualNFTs.push(nftData);
+                            console.log(`Found individually stored NFT: ${nftData.id}`);
+                        }
+                    } catch (e) {
+                        console.warn(`Failed to parse individually stored NFT: ${key}`, e);
+                    }
+                }
+            }
+            
+            // Load from localStorage for immediate display
+            let localNFTs = [];
+            try {
+                localNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+                console.log('Loaded NFTs from localStorage:', localNFTs.length);
+                
+                // Merge with individual NFTs if any
+                if (individualNFTs.length > 0) {
+                    const mergedNFTs = [...localNFTs];
+                    for (const nft of individualNFTs) {
+                        if (!mergedNFTs.some(existing => existing.id === nft.id)) {
+                            mergedNFTs.push(nft);
+                        }
+                    }
+                    localNFTs = mergedNFTs;
+                    console.log('Merged with individual NFTs, new total:', localNFTs.length);
+                }
+                
+                if (localNFTs.length > 0) {
+                    setMintedNFTs(localNFTs);
+                }
+            } catch (e) {
+                console.error('Error parsing localStorage NFTs:', e);
+                // If main storage fails but we have individual NFTs, use those
+                if (individualNFTs.length > 0) {
+                    localNFTs = individualNFTs;
+                    setMintedNFTs(individualNFTs);
+                    console.log('Using individually stored NFTs as fallback');
+                }
             }
 
             // Load from contract for verification
@@ -204,48 +246,61 @@ export const Web3Provider = ({ children }) => {
             const nfts = [];
 
             // Limit to a reasonable number to prevent quota issues
-            const maxItems = Math.min(nftBalance.toNumber(), 5);
+            const maxItems = Math.min(nftBalance.toNumber(), 10); // Increased to 10
 
             for (let i = 0; i < maxItems; i++) {
                 try {
                     const tokenId = await contractInstance.tokenOfOwnerByIndex(userAddress, i);
+                    console.log(`Loading token #${i}: ID ${tokenId.toString()}`);
                     const tokenURI = await contractInstance.tokenURI(tokenId);
                     const creator = await contractInstance.creators(tokenId);
 
+                    // Check if we already have this NFT in local storage
                     const localNFT = localNFTs.find(nft => nft.id === tokenId.toString());
                     if (localNFT) {
+                        console.log(`Using cached data for token ${tokenId.toString()}`);
                         nfts.push(localNFT);
                         continue;
                     }
 
+                    console.log(`Fetching metadata for token ${tokenId.toString()} from URI: ${tokenURI}`);
                     let metadata = {};
                     try {
-                        const hashMatch = tokenURI.match(/Qm[a-zA-Z0-9]+/);
-                        if (hashMatch) {
-                            const hash = hashMatch[0];
-                            const stored = localStorage.getItem(`metadata_${hash}`);
-                            if (stored) {
-                                metadata = JSON.parse(stored);
-                            } else {
-                                metadata = {
-                                    name: `NFT #${tokenId}`,
-                                    description: 'IPFS metadata (not cached)',
-                                    image: '',
-                                };
-                            }
-                        } else if (tokenURI.startsWith('data:application/json;base64,')) {
+                        // Try to parse base64 encoded metadata
+                        if (tokenURI.startsWith('data:application/json;base64,')) {
                             const base64Data = tokenURI.split(',')[1];
                             const jsonString = atob(base64Data);
                             metadata = JSON.parse(jsonString);
-                        } else {
-                            metadata = {
-                                name: `NFT #${tokenId}`,
-                                description: tokenURI,
-                                image: '',
-                            };
+                            console.log(`Parsed base64 metadata for token ${tokenId.toString()}:`, metadata);
+                        } 
+                        // Try to get from IPFS hash in localStorage
+                        else {
+                            const hashMatch = tokenURI.match(/Qm[a-zA-Z0-9]+/);
+                            if (hashMatch) {
+                                const hash = hashMatch[0];
+                                const stored = localStorage.getItem(`metadata_${hash}`);
+                                if (stored) {
+                                    metadata = JSON.parse(stored);
+                                    console.log(`Retrieved metadata from localStorage for hash ${hash}`);
+                                } else {
+                                    console.log(`No cached metadata found for hash ${hash}`);
+                                    metadata = {
+                                        name: `NFT #${tokenId}`,
+                                        description: 'IPFS metadata (not cached)',
+                                        image: '',
+                                    };
+                                }
+                            } else {
+                                console.log(`No IPFS hash found in URI: ${tokenURI}`);
+                                metadata = {
+                                    name: `NFT #${tokenId}`,
+                                    description: tokenURI,
+                                    image: '',
+                                };
+                            }
                         }
                     } catch (metadataError) {
-                        console.warn('Error fetching metadata for token', tokenId, metadataError);
+                        console.error('Error fetching metadata for token', tokenId, metadataError);
                         metadata = {
                             name: `NFT #${tokenId}`,
                             description: 'Metadata unavailable',
@@ -253,11 +308,17 @@ export const Web3Provider = ({ children }) => {
                         };
                     }
 
+                    // Process image URL if needed
+                    let imageUrl = metadata.image || '';
+                    if (imageUrl.startsWith('ipfs://')) {
+                        imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                    }
+
                     const nftData = {
                         id: tokenId.toString(),
                         title: metadata.name || `NFT #${tokenId}`,
                         description: metadata.description || '',
-                        image: metadata.image || '',
+                        image: imageUrl,
                         creator: creator,
                         owner: userAddress, // Explicitly set owner to current user
                         tokenURI: tokenURI,
@@ -265,33 +326,42 @@ export const Web3Provider = ({ children }) => {
                         reward: 10,
                     };
 
+                    console.log(`Created NFT data for token ${tokenId.toString()}:`, nftData);
                     nfts.push(nftData);
+                    
+                    // Store this NFT individually as a backup
+                    try {
+                        localStorage.setItem(`nft_${tokenId}`, JSON.stringify(nftData));
+                    } catch (e) {
+                        console.warn(`Failed to store individual NFT ${tokenId}`, e);
+                    }
                 } catch (tokenError) {
-                    console.warn('Error loading token at index', i, tokenError);
+                    console.error('Error loading token at index', i, tokenError);
                 }
             }
 
-            // Store only essential data and limit to 5 items
-            const slimNFTs = nfts.map(nft => ({
-                id: nft.id,
-                title: nft.title,
-                image: nft.image,
-                creator: nft.creator,
-                owner: nft.owner, // Include owner property
-                timestamp: nft.timestamp,
-                reward: nft.reward,
-            }));
-
-            try {
-                localStorage.setItem('userNFTs', JSON.stringify(slimNFTs));
-            } catch (storageError) {
-                console.warn('Failed to update localStorage, clearing old data:', storageError);
-                localStorage.removeItem('userNFTs');
-                localStorage.setItem('userNFTs', JSON.stringify(slimNFTs.slice(0, 2))); // Fallback to 2 items
-            }
-
             console.log('Processed NFTs:', nfts.length);
-            setMintedNFTs(slimNFTs);
+            
+            if (nfts.length > 0) {
+                // Store in localStorage
+                try {
+                    localStorage.setItem('userNFTs', JSON.stringify(nfts));
+                    console.log('Updated localStorage with NFTs');
+                } catch (storageError) {
+                    console.error('Failed to update localStorage:', storageError);
+                    // Try to clear and store fewer items
+                    try {
+                        localStorage.removeItem('userNFTs');
+                        localStorage.setItem('userNFTs', JSON.stringify(nfts.slice(0, 3)));
+                        console.log('Stored reduced set of NFTs in localStorage');
+                    } catch (fallbackError) {
+                        console.error('Fallback storage also failed:', fallbackError);
+                    }
+                }
+                
+                // Update state with the NFTs we found
+                setMintedNFTs(nfts);
+            }
         } catch (error) {
             console.error('Error loading user NFTs:', error);
         }
@@ -308,30 +378,66 @@ export const Web3Provider = ({ children }) => {
             const tx = await contract.mintNFT(metadataURI, {
                 gasLimit: 300000, // Conservative gas limit
             });
+            console.log("Minting transaction sent:", tx.hash);
             const receipt = await tx.wait();
+            console.log("Minting transaction confirmed:", receipt);
 
             // Get the token ID from the event
             const event = receipt.events?.find(e => e.event === 'Transfer');
-            const tokenId = event?.args?.tokenId;
+            console.log("Transfer event:", event);
+            
+            let tokenId;
+            if (event && event.args) {
+                tokenId = event.args.tokenId || event.args[2]; // Try both named and positional args
+                console.log("Token ID from event:", tokenId.toString());
+            } else {
+                // Fallback: try to get the latest token ID
+                const nftBalance = await contract.nftBalanceOf(account);
+                if (nftBalance.gt(0)) {
+                    tokenId = await contract.tokenOfOwnerByIndex(account, nftBalance.sub(1));
+                    console.log("Token ID from balance check:", tokenId.toString());
+                }
+            }
 
             if (tokenId) {
-                // Try to get metadata from localStorage using the URI hash
+                // Parse and store the metadata
                 try {
                     let metadata = {};
-                    const hashMatch = metadataURI.match(/Qm[a-zA-Z0-9]+/);
-                    if (hashMatch) {
-                        const hash = hashMatch[0];
-                        const stored = localStorage.getItem(`metadata_${hash}`);
-                        if (stored) {
-                            metadata = JSON.parse(stored);
+                    
+                    // First try to parse from the URI directly if it's base64 encoded
+                    if (metadataURI.startsWith('data:application/json;base64,')) {
+                        const base64Data = metadataURI.split(',')[1];
+                        const jsonString = atob(base64Data);
+                        metadata = JSON.parse(jsonString);
+                        console.log("Parsed metadata from base64:", metadata);
+                    } else {
+                        // Try to get metadata from localStorage using the URI hash
+                        const hashMatch = metadataURI.match(/Qm[a-zA-Z0-9]+/);
+                        if (hashMatch) {
+                            const hash = hashMatch[0];
+                            const stored = localStorage.getItem(`metadata_${hash}`);
+                            if (stored) {
+                                metadata = JSON.parse(stored);
+                                console.log("Retrieved metadata from localStorage:", metadata);
+                            }
                         }
                     }
 
                     // Store NFT locally for immediate display
-                    storeNFTLocally(tokenId, metadata, account);
+                    const nftData = storeNFTLocally(tokenId, metadata, account);
+                    console.log("Stored NFT locally:", nftData);
+                    
+                    // Force update the mintedNFTs state
+                    setMintedNFTs(prev => {
+                        const updated = [nftData, ...prev.filter(nft => nft.id !== tokenId.toString())];
+                        console.log("Updated mintedNFTs state:", updated);
+                        return updated;
+                    });
                 } catch (metadataError) {
-                    console.warn('Could not get metadata for immediate display:', metadataError);
+                    console.error('Could not get metadata for immediate display:', metadataError);
                 }
+            } else {
+                console.error("Failed to get token ID from transaction");
             }
 
             // Update token balance after successful mint
@@ -450,13 +556,24 @@ export const Web3Provider = ({ children }) => {
 
     // Store NFT data locally for immediate display
     const storeNFTLocally = (tokenId, metadata, creator) => {
-        const imageUrl = metadata.image || '';
+        console.log("Storing NFT locally with metadata:", metadata);
+        
+        // Handle different image URL formats
+        let imageUrl = '';
+        if (metadata.image) {
+            imageUrl = metadata.image;
+            // If it's an IPFS hash without the full URL, add the gateway prefix
+            if (imageUrl.startsWith('ipfs://')) {
+                imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+            }
+        }
 
         // Store metadata by IPFS hash for future reference
-        const hashMatch = imageUrl.match(/Qm[a-zA-Z0-9]+/);
+        const hashMatch = imageUrl.match(/Qm[a-zA-Z0-9]+/) || (metadata.image && metadata.image.match(/Qm[a-zA-Z0-9]+/));
         if (hashMatch) {
             const hash = hashMatch[0];
             localStorage.setItem(`metadata_${hash}`, JSON.stringify(metadata));
+            console.log(`Stored metadata for hash ${hash} in localStorage`);
         }
 
         const nftData = {
@@ -470,13 +587,24 @@ export const Web3Provider = ({ children }) => {
             reward: 10,
         };
 
-        // Update localStorage
-        const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
-        const updatedNFTs = [nftData, ...existingNFTs.filter(nft => nft.id !== tokenId.toString())];
-        localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
+        console.log("Created NFT data object:", nftData);
 
-        // Force state update
-        setMintedNFTs(prev => [nftData, ...prev]);
+        // Update localStorage
+        try {
+            const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+            const updatedNFTs = [nftData, ...existingNFTs.filter(nft => nft.id !== tokenId.toString())];
+            localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
+            console.log("Updated localStorage with new NFT data");
+        } catch (error) {
+            console.error("Error updating localStorage:", error);
+            // Fallback: try to store just this NFT
+            try {
+                localStorage.setItem(`nft_${tokenId}`, JSON.stringify(nftData));
+                console.log(`Stored NFT ${tokenId} in separate localStorage item`);
+            } catch (fallbackError) {
+                console.error("Fallback storage also failed:", fallbackError);
+            }
+        }
 
         return nftData;
     };
