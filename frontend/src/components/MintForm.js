@@ -161,7 +161,7 @@ const MintForm = () => {
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         style={{ ...inputStyles, minHeight: '100px', resize: 'vertical' }}
-                        placeholder="Describe your artwork..."Error
+                        placeholder="Describe your artwork..."
                     />
                 </div>
 
