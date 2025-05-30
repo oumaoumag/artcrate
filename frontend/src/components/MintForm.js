@@ -182,7 +182,7 @@ const MintForm = () => {
                             htmlFor="image-upload"
                             style={{
                                 display: 'block',
-                                width: '85%',
+                                width: '88%',
                                 background: 'rgba(0,0,0,0.3)',
                                 border: '2px dashed rgba(250, 204, 21, 0.3)',
                                 borderRadius: '12px',
