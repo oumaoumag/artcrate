@@ -259,6 +259,7 @@ export const Web3Provider = ({ children }) => {
                         description: metadata.description || '',
                         image: metadata.image || '',
                         creator: creator,
+                        owner: userAddress, // Explicitly set owner to current user
                         tokenURI: tokenURI,
                         timestamp: new Date().toISOString(),
                         reward: 10,
@@ -276,6 +277,7 @@ export const Web3Provider = ({ children }) => {
                 title: nft.title,
                 image: nft.image,
                 creator: nft.creator,
+                owner: nft.owner, // Include owner property
                 timestamp: nft.timestamp,
                 reward: nft.reward,
             }));
@@ -463,6 +465,7 @@ export const Web3Provider = ({ children }) => {
             description: metadata.description || '',
             image: imageUrl,
             creator: creator,
+            owner: creator, // Set owner to creator for newly minted NFTs
             timestamp: new Date().toISOString(),
             reward: 10,
         };
