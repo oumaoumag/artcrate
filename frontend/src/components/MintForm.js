@@ -15,7 +15,7 @@ const cardStyles = {
 };
 
 const inputStyles = {
-    width: '100%',
+    width: '95%',
     background: 'rgba(0,0,0,0.3)',
     border: '1px solid rgba(250, 204, 21, 0.3)',
     borderRadius: '12px',
@@ -161,7 +161,7 @@ const MintForm = () => {
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         style={{ ...inputStyles, minHeight: '100px', resize: 'vertical' }}
-                        placeholder="Describe your artwork..."
+                        placeholder="Describe your artwork..."Error
                     />
                 </div>
 
@@ -182,7 +182,7 @@ const MintForm = () => {
                             htmlFor="image-upload"
                             style={{
                                 display: 'block',
-                                width: '100%',
+                                width: '85%',
                                 background: 'rgba(0,0,0,0.3)',
                                 border: '2px dashed rgba(250, 204, 21, 0.3)',
                                 borderRadius: '12px',
