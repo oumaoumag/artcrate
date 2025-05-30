@@ -40,6 +40,8 @@ const NFTCard = ({ nft }) => {
                             objectFit: 'cover',
                         }}
                         onError={(e) => {
+                            console.log('Image failed to load:', nft.image);
+                            console.log.apply('Error:', e);
                             e.target.onerror = null;
                             e.target.src = 'https://via.placeholder.com/300?text=NFT';
                         }}
