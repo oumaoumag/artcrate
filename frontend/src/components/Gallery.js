@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Image, Coins } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
-import { NFTCard } from './NFTCard'
+import  NFTCard from '../components/NFTCard.js'
 
 // Helper function to handle different image URL formats
 const getImageUrl = (imageUrl) => {
