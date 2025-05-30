@@ -10,8 +10,8 @@ export const uploadToIPFS = async (file, setProgress = () => {}) => {
    const response = await fetch(IPFS_CONFIG.uploadEndpoint, {
     method: 'POST',
     headers: {
-      pinata_api_key: IPFS_CONFIG.apiKey,
-      pinata_secret_api_key: IPFS_CONFIG.secretKey,
+      'pinata_api_key': IPFS_CONFIG.apiKey,
+      'pinata_secret_api_key': IPFS_CONFIG.secretKey,
     },
     body: formData,
    });
@@ -40,8 +40,8 @@ export const uploadMetadataToIPFS = async (metadata) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      pinata_api_key: IPFS_CONFIG.apiKey,
-      pinata_secret_api_key: IPFS_CONFIG.secretKey,
+      'pinata_api_key': IPFS_CONFIG.apiKey,
+      'pinata_secret_api_key': IPFS_CONFIG.secretKey,
     },
     body: JSON.stringify(metadata),
    });
