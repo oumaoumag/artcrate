@@ -10,6 +10,14 @@ const NFTCard = ({ nft }) => {
     // Check if the current user is the owner
     const isOwner = account && account.toLowerCase() === nft.owner?.toLowerCase();    
 
+    const IPFS_GATEWAYS = [ 
+        'https://ipfs.io/ipfs/',
+        'https://gateway.pinata.cloud/ipfs/',
+        'https://cloudflare-ipfs.com/ipfs/',
+        'https://dweb.link/ipfs/',
+        'https:w3s.link/ipfs'
+    ];
+    
     return (
         <div style={{
             background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(234, 88, 12, 0.3))',
