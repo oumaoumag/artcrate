@@ -17,7 +17,40 @@ const NFTCard = ({ nft }) => {
         'https://dweb.link/ipfs/',
         'https:w3s.link/ipfs'
     ];
-    
+
+    const NFTCard = ({nft}) => {
+        const [currentGatewayIndex, setCurrentGatewayIndex] = useState(0);
+        const [imageError, setImageError] = useState(false);
+
+        const getImageUrl = (imageUrl, gatewayIndex = 0) => {
+            if (!imageUrl) return;
+
+            if (imageUrl.startsWith('data:') || imageUrl.startsWith('http')) {
+                return imageUrl;
+            }
+
+            let hash = imageUrl;
+            if (imageUrl.startsWith('ipfs://')) {
+                hash = imageUrl.replace('ipfs://');
+            }
+
+            const gateway = IPFS_GATEWAYS[gatewayIndex] || IPFS_GATEWAYS[0];
+            return `${gateway}${hash}`;
+        };
+
+        const handleImageError = () => {
+            console.log(`Gateway ${currentGatewayIndex} failed for image`, nft.image);
+
+            if (currentGatewayIndex < IPFS_GATEWAYS.length - 1) {
+                console.log(`Trying gateway ${currentGatewayIndex+1}`);
+                setCurrentGatewayIndex(currentGatewayIndex + 1);
+            } else {
+                console.log('All gateways failed');
+                setImageError(true);
+            }
+    };
+
+
     return (
         <div style={{
             background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(234, 88, 12, 0.3))',
@@ -37,7 +70,7 @@ const NFTCard = ({ nft }) => {
             }}>
                 {nft.image ? (
                     <img 
-                        src={nft.image} 
+                        src={getImageUrl(nft.image, currentGatewayIndex)} 
                         alt={nft.title}
                         style={{
                             position: 'absolute',
@@ -47,15 +80,10 @@ const NFTCard = ({ nft }) => {
                             height: '100%',
                             objectFit: 'cover',
                         }}
-                        onError={(e) => {
-                            console.log('Image failed to load:', nft.image);
-                            console.log.apply('Error:', e);
-                            e.target.onerror = null;
-                            e.target.src = 'https://via.placeholder.com/300?text=NFT';
-                        }}
-                    />
-                ) : (
-                    <div style={{
+                        onError= {handleImageError} 
+                        />
+                    ) : (
+                        <div style={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
@@ -141,5 +169,6 @@ const NFTCard = ({ nft }) => {
         </div>
     );
 };
+}
 
 export default NFTCard;
