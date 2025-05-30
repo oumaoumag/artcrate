@@ -82,14 +82,21 @@ const modalStyles = {
 };
 
 const TransferNFTModal = ({ nft, onClose }) => {
-    const { transferNFT } = useWeb3();
+    const { account, transferNFT } = useWeb3();
     const [recipient, setRecipient] = useState('');
     const [isTransferring, setIsTransferring] = useState(false);
     const [error, setError] = useState('');
 
     const handleTransfer = async () => {
+        // Validate recipient address
         if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
             setError('Please enter a valid Ethereum address');
+            return;
+        }
+
+        // Verify ownership
+        if (!account || account.toLowerCase() !== nft.owner?.toLowerCase()) {
+            setError('You are not the owner of this NFT');
             return;
         }
 
@@ -120,14 +127,15 @@ const TransferNFTModal = ({ nft, onClose }) => {
                 </h3>
 
                 <div style={modalStyles.nftPreview}>
-                    <img 
-                        src={nft.image || 'https://via.placeholder.com/60?text=NFT'} 
+                    <img
+                        src={nft.image || 'https://via.placeholder.com/60?text=NFT'}
                         alt={nft.title}
                         style={modalStyles.nftImage}
                     />
                     <div style={modalStyles.nftInfo}>
                         <div style={{ color: '#fde047', fontWeight: 'bold' }}>{nft.title}</div>
                         <div style={{ color: '#fdba74', fontSize: '0.875rem' }}>ID: {nft.id}</div>
+                        <div style={{ color: '#fdba74', fontSize: '0.875rem' }}>Owner: {nft.owner}</div>
                     </div>
                 </div>
 
