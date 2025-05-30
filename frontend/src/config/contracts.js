@@ -19,6 +19,8 @@ export const NETWORKS = {
   },
 };
 
+
+
 // IPFS configuration
 export const IPFS_CONFIG = {
   gateway: "https://ipfs.io/ipfs/",
