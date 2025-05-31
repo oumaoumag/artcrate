@@ -91,13 +91,19 @@ console.log(`
 🔍 NFT Debug Utility Loaded!
 
 To debug NFT display issues, run:
-  debugNFTs()
+debugNFTs()
 
 This will show:
 - NFTs stored in localStorage
 - Environment configuration
 - IPFS gateway status
 - React context info
+
+To fix NFT display issues:
+fixAllNFTIssues()  - Comprehensive fix for all issues
+fixSpecificNFTs([6, 7, 8])  - Fix specific NFT IDs
+debugIPFS()  - Detailed IPFS analysis
+testIPFSGateways()  - Test gateway connectivity
 
 For more detailed debugging:
 1. Open React DevTools
