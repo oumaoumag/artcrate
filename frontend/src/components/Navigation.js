@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Image, Zap } from 'lucide-react';
+import { Plus, Image, Zap, Bug } from 'lucide-react';
 
 const Navigation = ({ activeTab, setActiveTab }) => {
   const tabs = [
@@ -7,6 +7,11 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     { id: 'gallery', label: 'Gallery', icon: Image },
     { id: 'activity', label: 'Activity', icon: Zap }
   ];
+  
+  // Add debug tab in development
+  if (process.env.NODE_ENV === 'development') {
+    tabs.push({ id: 'debug', label: 'Debug', icon: Bug });
+  }
 
   return (
     <div style={{
