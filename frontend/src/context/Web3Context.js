@@ -246,7 +246,7 @@ export const Web3Provider = ({ children }) => {
             const nfts = [];
 
             // Limit to a reasonable number to prevent quota issues
-            const maxItems = Math.min(nftBalance.toNumber(), 50); // Increased to 10
+            const maxItems = Math.min(nftBalance.toNumber(), 50); // Increased to 50
 
             for (let i = 0; i < maxItems; i++) {
                 try {
