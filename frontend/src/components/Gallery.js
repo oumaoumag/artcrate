@@ -44,7 +44,7 @@ const cardStyles = {
 
 
 const Gallery = () => {
-    const { mintedNFTs } = useWeb3();
+    const { mintedNFTs, isLoadingNFTs } = useWeb3();
 
     return (
         <div style={cardStyles}>
@@ -53,7 +53,25 @@ const Gallery = () => {
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fde047', margin: 0 }}>NFT Gallery</h3>
             </div>
 
-            {mintedNFTs.length === 0 ? (
+            {isLoadingNFTs ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                    <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '3px solid rgba(253, 186, 116, 0.3)',
+                        borderTopColor: '#fdba74',
+                        borderRadius: '50%',
+                        margin: '0 auto 1rem',
+                        animation: 'spin 1s linear infinite',
+                    }} />
+                    <p style={{ color: '#fdba74' }}>Loading your NFTs...</p>
+                    <style>{`
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            ) : mintedNFTs.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem 0' }}>
                     <Image size={64} color="rgba(253, 186, 116, 0.5)" style={{ margin: '0 auto 1rem' }} />
                     <h4 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fdba74', marginBottom: '0.5rem' }}>Gallery Coming Soon</h4>
