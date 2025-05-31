@@ -6,17 +6,60 @@ import TransferNFTModal from './TransferNFTModal';
 const NFTCard = ({ nft }) => {
     const { account } = useWeb3();
     const [showTransferModal, setShowTransferModal] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const [currentGatewayIndex, setCurrentGatewayIndex] = useState(0);
     
     // Check if the current user is the owner
     const isOwner = account && account.toLowerCase() === nft.owner?.toLowerCase();    
 
     const IPFS_GATEWAYS = [ 
-        'https://ipfs.io/ipfs/',
         'https://gateway.pinata.cloud/ipfs/',
+        'https://ipfs.io/ipfs/',
         'https://cloudflare-ipfs.com/ipfs/',
         'https://dweb.link/ipfs/',
-        'https:w3s.link/ipfs'
+        'https://w3s.link/ipfs/'
     ];
+
+    // Helper function to get proper image URL
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) return 'https://via.placeholder.com/300?text=NFT';
+        
+        // If it's a data URL, return as is
+        if (imageUrl.startsWith('data:')) {
+            return imageUrl;
+        }
+        
+        // If it's already a full URL
+        if (imageUrl.startsWith('http')) {
+            return imageUrl;
+        }
+        
+        // If it's an IPFS URL with ipfs:// protocol
+        if (imageUrl.startsWith('ipfs://')) {
+            const hash = imageUrl.replace('ipfs://', '');
+            return IPFS_GATEWAYS[currentGatewayIndex] + hash;
+        }
+        
+        // If it's just an IPFS hash
+        if (imageUrl.match(/^Qm[a-zA-Z0-9]+$/)) {
+            return IPFS_GATEWAYS[currentGatewayIndex] + imageUrl;
+        }
+        
+        // Default fallback
+        return 'https://via.placeholder.com/300?text=NFT';
+    };
+
+    const handleImageError = () => {
+        console.log(`Image failed to load from gateway ${currentGatewayIndex}:`, getImageUrl(nft.image));
+        
+        // Try next gateway
+        if (currentGatewayIndex < IPFS_GATEWAYS.length - 1) {
+            setCurrentGatewayIndex(currentGatewayIndex + 1);
+        } else {
+            // All gateways failed
+            setImageError(true);
+        }
+    };
     
     return (
         <div style={{
@@ -35,9 +78,9 @@ const NFTCard = ({ nft }) => {
                 paddingTop: '100%', // 1:1 Aspect ratio
                 backgroundColor: 'rgba(0,0,0,0.2)',
             }}>
-                {nft.image ? (
+                {!imageError && nft.image ? (
                     <img 
-                        src={nft.image} 
+                        src={getImageUrl(nft.image)} 
                         alt={nft.title}
                         style={{
                             position: 'absolute',
@@ -47,12 +90,7 @@ const NFTCard = ({ nft }) => {
                             height: '100%',
                             objectFit: 'cover',
                         }}
-                        onError={(e) => {
-                            console.log('Image failed to load:', nft.image);
-                            console.log.apply('Error:', e);
-                            e.target.onerror = null;
-                            e.target.src = 'https://via.placeholder.com/300?text=NFT';
-                        }}
+                        onError={handleImageError}
                     />
                 ) : (
                     <div style={{
