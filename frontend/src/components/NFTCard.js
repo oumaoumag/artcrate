@@ -13,11 +13,14 @@ const NFTCard = ({ nft }) => {
     const isOwner = account && account.toLowerCase() === nft.owner?.toLowerCase();    
 
     const IPFS_GATEWAYS = [ 
-        'https://gateway.pinata.cloud/ipfs/',
-        'https://ipfs.io/ipfs/',
+        'https://nftstorage.link/ipfs/',
+        'https://w3s.link/ipfs/',
         'https://cloudflare-ipfs.com/ipfs/',
+        'https://ipfs.filebase.io/ipfs/',
+        'https://gateway.ipfs.io/ipfs/',
         'https://dweb.link/ipfs/',
-        'https://w3s.link/ipfs/'
+        'https://ipfs.io/ipfs/',
+        'https://gateway.pinata.cloud/ipfs/'
     ];
 
     // Helper function to get proper image URL
