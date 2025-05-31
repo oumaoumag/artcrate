@@ -241,6 +241,103 @@ export const Web3Provider = ({ children }) => {
         return keysToRemove.length;
     };
 
+    // Hide specific NFTs from display
+    const hideNFTs = (nftIds) => {
+        console.log('Hiding NFTs:', nftIds);
+        
+        // Get or create hidden NFTs list
+        let hiddenNFTs = [];
+        try {
+            hiddenNFTs = JSON.parse(localStorage.getItem('hiddenNFTs') || '[]');
+        } catch (e) {
+            console.error('Error parsing hidden NFTs:', e);
+        }
+        
+        // Add new IDs to hidden list
+        const newHidden = [...new Set([...hiddenNFTs, ...nftIds])];
+        localStorage.setItem('hiddenNFTs', JSON.stringify(newHidden));
+        
+        // Filter out hidden NFTs from current state
+        setMintedNFTs(prev => prev.filter(nft => !nftIds.includes(nft.id)));
+        
+        console.log(`Hidden ${nftIds.length} NFTs`);
+        return newHidden.length;
+    };
+
+    // Show hidden NFTs again
+    const showHiddenNFTs = async () => {
+        localStorage.removeItem('hiddenNFTs');
+        console.log('Showing all hidden NFTs');
+        
+        // Reload NFTs to include hidden ones
+        if (contract && account) {
+            await loadUserNFTs(contract, account);
+        }
+    };
+
+    // Get list of hidden NFT IDs
+    const getHiddenNFTs = () => {
+        try {
+            return JSON.parse(localStorage.getItem('hiddenNFTs') || '[]');
+        } catch (e) {
+            return [];
+        }
+    };
+
+    // Fix NFTs with truncated IPFS hashes
+    const fixTruncatedHashes = async () => {
+        console.log('Attempting to fix NFTs with truncated IPFS hashes...');
+        
+        const userNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+        let fixedCount = 0;
+        
+        for (const nft of userNFTs) {
+            if (nft.image) {
+                const hashMatch = nft.image.match(/([Qm|bafy][a-zA-Z0-9]+)/);
+                if (hashMatch) {
+                    const hash = hashMatch[1];
+                    
+                    // Check if hash is truncated
+                    if ((hash.startsWith('Qm') && hash.length < 46) || 
+                        (hash.startsWith('bafy') && hash.length < 59)) {
+                        
+                        console.log(`Found truncated hash in NFT ${nft.id}: ${hash}`);
+                        
+                        // Try to get full hash from tokenURI
+                        if (nft.tokenURI) {
+                            const fullHashMatch = nft.tokenURI.match(/([Qm|bafy][a-zA-Z0-9]{44,})/);
+                            if (fullHashMatch) {
+                                const fullHash = fullHashMatch[0];
+                                console.log(`Found full hash: ${fullHash}`);
+                                
+                                // Update the image URL
+                                nft.image = nft.image.replace(hash, fullHash);
+                                fixedCount++;
+                                
+                                // Also update individual storage
+                                localStorage.setItem(`nft_${nft.id}`, JSON.stringify(nft));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (fixedCount > 0) {
+            localStorage.setItem('userNFTs', JSON.stringify(userNFTs));
+            console.log(`Fixed ${fixedCount} NFTs with truncated hashes`);
+            
+            // Reload NFTs to reflect changes
+            if (contract && account) {
+                await loadUserNFTs(contract, account);
+            }
+        } else {
+            console.log('No truncated hashes found to fix');
+        }
+        
+        return fixedCount;
+    };
+
     // Load user's NFTs from localStorage and contract
     const loadUserNFTs = useCallback(async (contractInstance, userAddress) => {
         console.log('Starting NFT load from contract');
@@ -338,9 +435,23 @@ export const Web3Provider = ({ children }) => {
                         } 
                         // Try to get from IPFS hash in localStorage or fetch from IPFS
                         else {
-                            const hashMatch = tokenURI.match(/Qm[a-zA-Z0-9]+/);
+                            // Extract IPFS hash - handle both full hashes and CIDv1
+                            const hashMatch = tokenURI.match(/(?:Qm[a-zA-Z0-9]{44}|bafy[a-zA-Z0-9]+)/i) || 
+                                             tokenURI.match(/([a-zA-Z0-9]{46,})/);
+                            
                             if (hashMatch) {
-                                const hash = hashMatch[0];
+                                let hash = hashMatch[0];
+                                
+                                // Check if hash looks truncated (less than 46 chars for CIDv0)
+                                if (hash.startsWith('Qm') && hash.length < 46) {
+                                    console.warn(`IPFS hash appears truncated: ${hash} (${hash.length} chars)`);
+                                    // Try to extract from the full URI if possible
+                                    const fullHashMatch = tokenURI.match(/ipfs\/([^\/\s]+)/);
+                                    if (fullHashMatch && fullHashMatch[1].length >= 46) {
+                                        hash = fullHashMatch[1];
+                                        console.log(`Using full hash from URI: ${hash}`);
+                                    }
+                                }
                                 const stored = localStorage.getItem(`metadata_${hash}`);
                                 if (stored) {
                                     metadata = JSON.parse(stored);
@@ -350,10 +461,16 @@ export const Web3Provider = ({ children }) => {
                                     
                                     // Try to fetch from IPFS
                                     try {
+                                        // Use CORS-friendly gateways first
                                         const ipfsGateways = [
-                                            `https://gateway.pinata.cloud/ipfs/${hash}`,
+                                            `https://nftstorage.link/ipfs/${hash}`,
+                                            `https://w3s.link/ipfs/${hash}`,
+                                            `https://cloudflare-ipfs.com/ipfs/${hash}`,
+                                            `https://ipfs.filebase.io/ipfs/${hash}`,
+                                            `https://gateway.ipfs.io/ipfs/${hash}`,
+                                            `https://dweb.link/ipfs/${hash}`,
                                             `https://ipfs.io/ipfs/${hash}`,
-                                            `https://cloudflare-ipfs.com/ipfs/${hash}`
+                                            `https://gateway.pinata.cloud/ipfs/${hash}`
                                         ];
                                         
                                         let fetchedMetadata = null;
@@ -365,6 +482,7 @@ export const Web3Provider = ({ children }) => {
                                                     headers: {
                                                         'Accept': 'application/json',
                                                     },
+                                                    mode: 'cors',
                                                     signal: AbortSignal.timeout(5000) // 5 second timeout
                                                 });
                                                 
@@ -438,9 +556,9 @@ export const Web3Provider = ({ children }) => {
                     // Process image URL if needed
                     let imageUrl = metadata.image || '';
                     if (imageUrl.startsWith('ipfs://')) {
-                        imageUrl = imageUrl.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+                        imageUrl = imageUrl.replace('ipfs://', 'https://nftstorage.link/ipfs/');
                     } else if (imageUrl.match(/^Qm[a-zA-Z0-9]+$/)) {
-                        imageUrl = `https://gateway.pinata.cloud/ipfs/${imageUrl}`;
+                        imageUrl = `https://nftstorage.link/ipfs/${imageUrl}`;
                     }
 
                     const nftData = {
@@ -471,6 +589,14 @@ export const Web3Provider = ({ children }) => {
 
             console.log('Processed NFTs:', nfts.length);
             
+            // Filter out hidden NFTs
+            const hiddenNFTs = getHiddenNFTs();
+            const visibleNFTs = nfts.filter(nft => !hiddenNFTs.includes(nft.id));
+            
+            if (hiddenNFTs.length > 0) {
+                console.log(`Filtered out ${hiddenNFTs.length} hidden NFTs`);
+            }
+            
             if (nfts.length > 0) {
                 // Store in localStorage
                 try {
@@ -488,8 +614,8 @@ export const Web3Provider = ({ children }) => {
                     }
                 }
                 
-                // Update state with the NFTs we found
-                setMintedNFTs(nfts);
+                // Update state with visible NFTs only
+                setMintedNFTs(visibleNFTs);
             }
         } catch (error) {
             console.error('Error loading user NFTs:', error);
@@ -695,9 +821,9 @@ export const Web3Provider = ({ children }) => {
             imageUrl = metadata.image;
             // If it's an IPFS hash without the full URL, add the gateway prefix
             if (imageUrl.startsWith('ipfs://')) {
-                imageUrl = imageUrl.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+                imageUrl = imageUrl.replace('ipfs://', 'https://nftstorage.link/ipfs/');
             } else if (imageUrl.match(/^Qm[a-zA-Z0-9]+$/)) {
-                imageUrl = `https://gateway.pinata.cloud/ipfs/${imageUrl}`;
+                imageUrl = `https://nftstorage.link/ipfs/${imageUrl}`;
             }
         }
 
@@ -767,6 +893,10 @@ export const Web3Provider = ({ children }) => {
         storeNFTLocally,
         loadUserNFTs,
         clearBadNFTCache,
+        hideNFTs,
+        showHiddenNFTs,
+        getHiddenNFTs,
+        fixTruncatedHashes,
     };
 
     return (
