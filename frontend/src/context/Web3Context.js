@@ -24,6 +24,7 @@ export const Web3Provider = ({ children }) => {
     const [signer, setSigner] = useState(null);
     const [chainId, setChainId] = useState(null);
     const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+    const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
 
     // Check if on correct network
     const checkNetwork = useCallback((currentChainId) => {
@@ -188,9 +189,69 @@ export const Web3Provider = ({ children }) => {
         }
     }, [checkConnection, handleAccountsChanged, handleChainChanged]);
 
+    // Clear NFTs with placeholder metadata
+    const clearBadNFTCache = () => {
+        console.log('Clearing NFTs with placeholder metadata...');
+        const keysToRemove = [];
+        
+        // Check individual NFT storage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('nft_')) {
+                try {
+                    const nftData = JSON.parse(localStorage.getItem(key));
+                    if (nftData && (
+                        nftData.description === 'IPFS metadata (not cached)' ||
+                        nftData.description === 'Unable to fetch IPFS metadata' ||
+                        nftData.description === 'IPFS metadata unavailable' ||
+                        nftData.description === 'Metadata unavailable'
+                    )) {
+                        keysToRemove.push(key);
+                    }
+                } catch (e) {
+                    console.warn(`Failed to check NFT ${key}`, e);
+                }
+            }
+        }
+        
+        // Remove bad entries
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            console.log(`Removed ${key} with placeholder metadata`);
+        });
+        
+        // Clean userNFTs array
+        try {
+            const userNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+            const cleanedNFTs = userNFTs.filter(nft => 
+                nft.description !== 'IPFS metadata (not cached)' &&
+                nft.description !== 'Unable to fetch IPFS metadata' &&
+                nft.description !== 'IPFS metadata unavailable' &&
+                nft.description !== 'Metadata unavailable'
+            );
+            
+            if (cleanedNFTs.length < userNFTs.length) {
+                localStorage.setItem('userNFTs', JSON.stringify(cleanedNFTs));
+                console.log(`Cleaned ${userNFTs.length - cleanedNFTs.length} NFTs with placeholder metadata from userNFTs`);
+            }
+        } catch (e) {
+            console.error('Error cleaning userNFTs:', e);
+        }
+        
+        return keysToRemove.length;
+    };
+
     // Load user's NFTs from localStorage and contract
     const loadUserNFTs = useCallback(async (contractInstance, userAddress) => {
         console.log('Starting NFT load from contract');
+        setIsLoadingNFTs(true);
+        
+        // Clean bad cache entries first
+        const cleaned = clearBadNFTCache();
+        if (cleaned > 0) {
+            console.log(`Cleaned ${cleaned} NFTs with bad metadata before loading`);
+        }
+        
         try {
             // First check if we have any individually stored NFTs (fallback storage)
             const individualNFTs = [];
@@ -257,10 +318,12 @@ export const Web3Provider = ({ children }) => {
 
                     // Check if we already have this NFT in local storage
                     const localNFT = localNFTs.find(nft => nft.id === tokenId.toString());
-                    if (localNFT) {
+                    if (localNFT && localNFT.description !== 'IPFS metadata (not cached)' && localNFT.description !== 'Unable to fetch IPFS metadata' && localNFT.description !== 'IPFS metadata unavailable') {
                         console.log(`Using cached data for token ${tokenId.toString()}`);
                         nfts.push(localNFT);
                         continue;
+                    } else if (localNFT) {
+                        console.log(`Found cached NFT ${tokenId.toString()} but with placeholder metadata, will re-fetch`);
                     }
 
                     console.log(`Fetching metadata for token ${tokenId.toString()} from URI: ${tokenURI}`);
@@ -273,7 +336,7 @@ export const Web3Provider = ({ children }) => {
                             metadata = JSON.parse(jsonString);
                             console.log(`Parsed base64 metadata for token ${tokenId.toString()}:`, metadata);
                         } 
-                        // Try to get from IPFS hash in localStorage
+                        // Try to get from IPFS hash in localStorage or fetch from IPFS
                         else {
                             const hashMatch = tokenURI.match(/Qm[a-zA-Z0-9]+/);
                             if (hashMatch) {
@@ -283,15 +346,79 @@ export const Web3Provider = ({ children }) => {
                                     metadata = JSON.parse(stored);
                                     console.log(`Retrieved metadata from localStorage for hash ${hash}`);
                                 } else {
-                                    console.log(`No cached metadata found for hash ${hash}`);
+                                    console.log(`No cached metadata found for hash ${hash}, attempting to fetch from IPFS`);
+                                    
+                                    // Try to fetch from IPFS
+                                    try {
+                                        const ipfsGateways = [
+                                            `https://gateway.pinata.cloud/ipfs/${hash}`,
+                                            `https://ipfs.io/ipfs/${hash}`,
+                                            `https://cloudflare-ipfs.com/ipfs/${hash}`
+                                        ];
+                                        
+                                        let fetchedMetadata = null;
+                                        for (const gateway of ipfsGateways) {
+                                            try {
+                                                console.log(`Trying IPFS gateway: ${gateway}`);
+                                                const response = await fetch(gateway, { 
+                                                    method: 'GET',
+                                                    headers: {
+                                                        'Accept': 'application/json',
+                                                    },
+                                                    signal: AbortSignal.timeout(5000) // 5 second timeout
+                                                });
+                                                
+                                                if (response.ok) {
+                                                    fetchedMetadata = await response.json();
+                                                    console.log(`Successfully fetched metadata from ${gateway}`);
+                                                    
+                                                    // Cache the metadata
+                                                    localStorage.setItem(`metadata_${hash}`, JSON.stringify(fetchedMetadata));
+                                                    break;
+                                                }
+                                            } catch (gatewayError) {
+                                                console.warn(`Failed to fetch from ${gateway}:`, gatewayError.message);
+                                            }
+                                        }
+                                        
+                                        if (fetchedMetadata) {
+                                            metadata = fetchedMetadata;
+                                        } else {
+                                            metadata = {
+                                                name: `NFT #${tokenId}`,
+                                                description: 'Unable to fetch IPFS metadata',
+                                                image: '',
+                                            };
+                                        }
+                                    } catch (ipfsError) {
+                                        console.error(`Error fetching IPFS metadata for hash ${hash}:`, ipfsError);
+                                        metadata = {
+                                            name: `NFT #${tokenId}`,
+                                            description: 'IPFS metadata unavailable',
+                                            image: '',
+                                        };
+                                    }
+                                }
+                            } else if (tokenURI.startsWith('http')) {
+                                // Try to fetch from HTTP URL
+                                try {
+                                    const response = await fetch(tokenURI, {
+                                        signal: AbortSignal.timeout(5000)
+                                    });
+                                    if (response.ok) {
+                                        metadata = await response.json();
+                                        console.log(`Fetched metadata from HTTP URL: ${tokenURI}`);
+                                    }
+                                } catch (httpError) {
+                                    console.error(`Error fetching HTTP metadata:`, httpError);
                                     metadata = {
                                         name: `NFT #${tokenId}`,
-                                        description: 'IPFS metadata (not cached)',
+                                        description: 'Metadata unavailable',
                                         image: '',
                                     };
                                 }
                             } else {
-                                console.log(`No IPFS hash found in URI: ${tokenURI}`);
+                                console.log(`Unknown URI format: ${tokenURI}`);
                                 metadata = {
                                     name: `NFT #${tokenId}`,
                                     description: tokenURI,
@@ -311,7 +438,9 @@ export const Web3Provider = ({ children }) => {
                     // Process image URL if needed
                     let imageUrl = metadata.image || '';
                     if (imageUrl.startsWith('ipfs://')) {
-                        imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                        imageUrl = imageUrl.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+                    } else if (imageUrl.match(/^Qm[a-zA-Z0-9]+$/)) {
+                        imageUrl = `https://gateway.pinata.cloud/ipfs/${imageUrl}`;
                     }
 
                     const nftData = {
@@ -364,6 +493,8 @@ export const Web3Provider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error loading user NFTs:', error);
+        } finally {
+            setIsLoadingNFTs(false);
         }
     }, []);
 
@@ -564,7 +695,9 @@ export const Web3Provider = ({ children }) => {
             imageUrl = metadata.image;
             // If it's an IPFS hash without the full URL, add the gateway prefix
             if (imageUrl.startsWith('ipfs://')) {
-                imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                imageUrl = imageUrl.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+            } else if (imageUrl.match(/^Qm[a-zA-Z0-9]+$/)) {
+                imageUrl = `https://gateway.pinata.cloud/ipfs/${imageUrl}`;
             }
         }
 
@@ -621,6 +754,7 @@ export const Web3Provider = ({ children }) => {
         signer,
         chainId,
         isCorrectNetwork,
+        isLoadingNFTs,
 
         // Functions
         connectWallet,
@@ -632,6 +766,7 @@ export const Web3Provider = ({ children }) => {
         addMintedNFT,
         storeNFTLocally,
         loadUserNFTs,
+        clearBadNFTCache,
     };
 
     return (
