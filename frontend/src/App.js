@@ -10,6 +10,7 @@ import {
   Navigation,
   DemoContent
 } from './components';
+import NFTDebugger from './components/NFTDebugger';
 import './App.css';
 
 // Import debug utility in development
@@ -240,6 +241,7 @@ const AppContent = () => {
               {activeTab === 'mint' && <MintForm />}
               {activeTab === 'gallery' && <Gallery />}
               {activeTab === 'activity' && <MintingLog />}
+              {process.env.NODE_ENV === 'development' && activeTab === 'debug' && <NFTDebugger />}
             </div>
           </div>
         </div>
