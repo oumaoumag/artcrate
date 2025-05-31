@@ -16,6 +16,8 @@ import './App.css';
 // Import debug utility in development
 if (process.env.NODE_ENV === 'development') {
   import('./utils/debug-nfts').catch(console.error);
+  import('./utils/ipfs-debug').catch(console.error);
+  import('./utils/ipfs-fix').catch(console.error);
 }
 
 // Simple inline styles for demo
