@@ -3,6 +3,32 @@ import { IPFS_CONFIG } from '../config/contracts';
 // IPFS upload function
 export const uploadToIPFS = async (file, setProgress = () => {}) => {
   setProgress('Uploading image...');
+  
+  // Check if API keys are configured
+  if (!IPFS_CONFIG.apiKey || !IPFS_CONFIG.secretKey) {
+    console.warn('Pinata API keys not configured, using data URL fallback');
+    setProgress('Using local storage for image...');
+    
+    // Convert to data URL for local storage
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        setProgress('Image processed successfully');
+        resolve({
+          success: true,
+          hash: 'local_' + Date.now(),
+          url: dataUrl,
+        });
+      };
+      reader.onerror = (error) => {
+        setProgress(`Failed to read file: ${error.message}`);
+        resolve({ success: false, error: error.message });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  
   try {
    const formData = new FormData();
    formData.append('file', file);
@@ -35,8 +61,28 @@ export const uploadToIPFS = async (file, setProgress = () => {}) => {
 
 // Upload metadata to IPFS - using simple hash for demo
 export const uploadMetadataToIPFS = async (metadata) => {
+  // Check if API keys are configured
+  if (!IPFS_CONFIG.apiKey || !IPFS_CONFIG.secretKey) {
+    console.warn('Pinata API keys not configured, using base64 data URL for metadata');
+    
+    // Convert metadata to base64 data URL
+    const jsonString = JSON.stringify(metadata);
+    const base64 = btoa(jsonString);
+    const dataUrl = `data:application/json;base64,${base64}`;
+    
+    // Store metadata in localStorage for retrieval
+    const hash = 'local_metadata_' + Date.now();
+    localStorage.setItem(`metadata_${hash}`, jsonString);
+    
+    return {
+      success: true,
+      hash: hash,
+      url: dataUrl,
+    };
+  }
+  
   try {
-   const reponse = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+   const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -46,11 +92,11 @@ export const uploadMetadataToIPFS = async (metadata) => {
     body: JSON.stringify(metadata),
    });
 
-   if (!reponse.ok) {
-    throw new Error(`Metadata upload failed: ${reponse.statusText}`);
+   if (!response.ok) {
+    throw new Error(`Metadata upload failed: ${response.statusText}`);
    }
 
-   const data = await reponse.json();
+   const data = await response.json();
    return {
     success: true,
     hash: data.IpfsHash,
