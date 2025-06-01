@@ -27,17 +27,18 @@ const TokenBalance = ({ variant = 'full', className = '' }) => {
   
   if (isCompact) {
     return (
-      <div className={cardClasses}>
+
+      <div className={cn(cardClasses, "p-2 sm:p-3 mb-2")}>
         <div className={LAYOUT.flex.between}>
           <div className={LAYOUT.flex.start}>
             <div className={cn(
-              "w-8 h-8 sm:w-10 sm:h-10",
+              "w-7 h-7 sm:w-8 sm:h-8",
                 "coin-gradient rounded-full flex items-center justify-center shadow-lg"
             )}>
-              <Coins size={16} className="sm:w-5 sm:h-5" color="#581c87" />
+              <Coins size={14} className="sm:w-4 sm:h-4" color="#581c87" />
             </div>
             <div>
-              <p className="text-lg sm:text-xl font-bold text-white m-0 leading-none">
+              <p className="text-base sm:text-lg font-bold text-white m-0 leading-none">
                 {tokenBalance}
               </p>
               <p className="text-xs text-orange-300 m-0 leading-none">
