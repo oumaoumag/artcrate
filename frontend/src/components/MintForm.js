@@ -2,45 +2,12 @@ import React, { useState } from 'react';
 import { Wallet, Plus, Image, Zap, Network } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import { uploadToIPFS, uploadMetadataToIPFS, createNFTMetadata } from '../utils/ipfs';
+import { CARD_CLASSES, TYPOGRAPHY, LAYOUT, ICONS, INTERACTIVE, STATUS, cn } from '../styles/design-system';
 
-// Shared styles
-const cardStyles = {
-    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(234, 88, 12, 0.5))',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(250, 204, 21, 0.3)',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-    marginBottom: '1.5rem'
-};
-
-const inputStyles = {
-    width: '95%',
-    background: 'rgba(0,0,0,0.3)',
-    border: '1px solid rgba(250, 204, 21, 0.3)',
-    borderRadius: '12px',
-    padding: '0.75rem 1rem',
-    color: 'white',
-    fontSize: '1rem',
-    marginBottom: '1rem'
-};
-
-const buttonStyles = {
-    background: 'linear-gradient(90deg, #eab308, #f97316)',
-    color: '#581c87',
-    fontWeight: 'bold',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '12px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.5rem',
-    width: '100%'
-};
-
+/**
+ * MintForm Component - Refactored with Tailwind
+ * Handles NFT minting with IPFS upload
+ */
 const MintForm = () => {
     const { account, mintNFT, isCorrectNetwork } = useWeb3();
     const [formData, setFormData] = useState({
@@ -51,7 +18,6 @@ const MintForm = () => {
     const [isMinting, setIsMinting] = useState(false);
     const [preview, setPreview] = useState(null);
     const [uploadProgress, setUploadProgress] = useState('');
-
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -71,12 +37,11 @@ const MintForm = () => {
         setUploadProgress('');
 
         try {
-            // Upload image to IPFS with progress tracking
+            // Upload image to IPFS
             const imageUpload = await uploadToIPFS(formData.image, setUploadProgress);
             if (!imageUpload.success) throw new Error('Failed to upload image to IPFS');
 
             setUploadProgress('Creating metadata...');
-            // Create and upload metadata
             const metadata = createNFTMetadata(
                 formData.title,
                 formData.description,
@@ -89,7 +54,6 @@ const MintForm = () => {
             if (!metadataUpload.success) throw new Error('Failed to upload metadata to IPFS');
             
             setUploadProgress('Minting NFT on blockchain...');
-            // Mint NFT
             const receipt = await mintNFT(metadataUpload.url);
             console.log('NFT minted successfully:', receipt);
 
@@ -107,155 +71,142 @@ const MintForm = () => {
         }
     };
 
+    // Wallet not connected state
     if (!account) {
         return (
-            <div style={cardStyles}>
-                <div style={{ textAlign: 'center' }}>
-                    <Wallet size={64} color="#facc15" style={{ margin: '0 auto 1rem' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fde047', marginBottom: '0.5rem' }}>Connect Your Wallet</h3>
-                    <p style={{ color: '#fdba74' }}>Connect your wallet to start minting NFTs and earning Creator Tokens</p>
+            <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+                <div className="text-center">
+                    <Wallet size={ICONS.sizes.hero} color={ICONS.colors.primary} className="mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-yellow-300 mb-2">Connect Your Wallet</h3>
+                    <p className={TYPOGRAPHY.body.secondary}>
+                        Connect your wallet to start minting NFTs and earning Creator Tokens
+                    </p>
                 </div>
             </div>
         );
     }
 
+    // Wrong network state
     if (!isCorrectNetwork) {
         return (
-            <div style={cardStyles}>
-                <div style={{ textAlign: 'center' }}>
-                    <Network size={64} color="#ef4444" style={{ margin: '0 auto 1rem' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#ef4444', marginBottom: '0.5rem' }}>Wrong Network</h3>
-                    <p style={{ color: '#fdba74' }}>Please switch to Lisk Sepolia network to mint NFTs</p>
+            <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+                <div className="text-center">
+                    <Network size={ICONS.sizes.hero} color="#ef4444" className="mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-red-400 mb-2">Wrong Network</h3>
+                    <p className={TYPOGRAPHY.body.secondary}>
+                        Please switch to Lisk Sepolia network to mint NFTs
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={cardStyles}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <Plus size={24} color="#facc15" />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fde047', margin: 0 }}>Mint New NFT</h3>
+        <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+            <div className={cn(LAYOUT.flex.start, "mb-6")}>
+                <Plus size={ICONS.sizes.large} color={ICONS.colors.primary} />
+                <h3 className={TYPOGRAPHY.heading.primary}>Mint New NFT</h3>
             </div>
 
-            <form onSubmit={handleMint} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <form onSubmit={handleMint} className="space-y-6">
+                {/* Title Input */}
                 <div>
-                    <label style={{ display: 'block', color: '#fdba74', fontWeight: 'medium', marginBottom: '0.5rem' }}>
+                    <label className="block text-orange-300 font-medium mb-2">
                         Artwork Title
                     </label>
                     <input
                         type="text"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        style={inputStyles}
+                        className={INTERACTIVE.input.base}
                         placeholder="Enter your artwork title..."
                         required
                     />
                 </div>
 
+                {/* Description Input */}
                 <div>
-                    <label style={{ display: 'block', color: '#fdba74', fontWeight: 'medium', marginBottom: '0.5rem' }}>
+                    <label className="block text-orange-300 font-medium mb-2">
                         Description
                     </label>
                     <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        style={{ ...inputStyles, minHeight: '100px', resize: 'vertical' }}
-                        placeholder="Describe your artwork..."Error
+                        className={INTERACTIVE.input.textarea}
+                        placeholder="Describe your artwork..."
                     />
                 </div>
 
+                {/* Image Upload */}
                 <div>
-                    <label style={{ display: 'block', color: '#fdba74', fontWeight: 'medium', marginBottom: '0.5rem' }}>
+                    <label className="block text-orange-300 font-medium mb-2">
                         Artwork Image
                     </label>
-                    <div style={{ position: 'relative' }}>
+                    <div className="relative">
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleImageChange}
-                            style={{ display: 'none' }}
+                            className="hidden"
                             id="image-upload"
                             required
                         />
                         <label
                             htmlFor="image-upload"
-                            style={{
-                                display: 'block',
-                                width: '88%',
-                                background: 'rgba(0,0,0,0.3)',
-                                border: '2px dashed rgba(250, 204, 21, 0.3)',
-                                borderRadius: '12px',
-                                padding: '2rem',
-                                textAlign: 'center',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                marginBottom: '1rem'
-                            }}
+                            className="block w-full bg-black/30 border-2 border-dashed border-yellow-400/30 rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-yellow-400/50 hover:bg-black/40"
                         >
                             {preview ? (
-                                <img src={preview} alt="Preview" style={{ maxHeight: '128px', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                                <img 
+                                    src={preview} 
+                                    alt="Preview" 
+                                    className="max-h-32 rounded-lg mb-2 mx-auto" 
+                                />
                             ) : (
-                                <Image size={48} color="#facc15" style={{ margin: '0 auto 0.5rem' }} />
+                                <Image 
+                                    size={ICONS.sizes.xlarge * 1.5} 
+                                    color={ICONS.colors.primary} 
+                                    className="mx-auto mb-2" 
+                                />
                             )}
-                            <p style={{ color: '#fdba74', margin: 0 }}>
+                            <p className={TYPOGRAPHY.body.secondary}>
                                 {preview ? 'Click to change image' : 'Click to upload image'}
                             </p>
                         </label>
                     </div>
                 </div>
 
+                {/* Upload Progress */}
                 {uploadProgress && (
-                    <div style={{ 
-                        marginBottom: '1rem', 
-                        color: uploadProgress.includes('Error') ? '#ef4444' : '#4ade80',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.75rem',
-                        background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '8px'
-                    }}>
+                    <div className={cn(
+                        "flex items-center gap-2 p-3 bg-black/20 rounded-lg",
+                        uploadProgress.includes('Error') ? STATUS.error : STATUS.success
+                    )}>
                         {uploadProgress.includes('Error') ? (
                             <span>⚠️</span>
                         ) : (
-                            <div style={{
-                                width: '16px',
-                                height: '16px',
-                                border: '2px solid #4ade80',
-                                borderTop: '2px solid transparent',
-                                borderRadius: '50%',
-                                animation: 'spin 1s linear infinite'
-                            }}></div>
+                            <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
                         )}
                         <span>{uploadProgress}</span>
                     </div>
                 )}
 
+                {/* Submit Button */}
                 <button
                     type="submit"
                     disabled={isMinting || !formData.title || !formData.image}
-                    style={{
-                        ...buttonStyles,
-                        opacity: (isMinting || !formData.title || !formData.image) ? 0.5 : 1,
-                        cursor: (isMinting || !formData.title || !formData.image) ? 'not-allowed' : 'pointer'
-                    }}
+                    className={cn(
+                        INTERACTIVE.button.primary,
+                        "w-full"
+                    )}
                 >
                     {isMinting ? (
                         <>
-                            <div style={{
-                                width: '20px',
-                                height: '20px',
-                                border: '2px solid #581c87',
-                                borderTop: '2px solid transparent',
-                                borderRadius: '50%',
-                                animation: 'spin 1s linear infinite'
-                            }}></div>
+                            <div className="w-5 h-5 border-2 border-purple-900 border-t-transparent rounded-full animate-spin" />
                             <span>Minting NFT...</span>
                         </>
                     ) : (
                         <>
-                            <Zap size={20} />
+                            <Zap size={ICONS.sizes.medium} />
                             <span>Mint NFT & Earn 10 CTK</span>
                         </>
                     )}
