@@ -31,13 +31,13 @@ const TokenBalance = ({ variant = 'full', className = '' }) => {
         <div className={LAYOUT.flex.between}>
           <div className={LAYOUT.flex.start}>
             <div className={cn(
-              coinContainerSize,
+              "w-8 h-8 sm:w-10 sm:h-10",
                 "coin-gradient rounded-full flex items-center justify-center shadow-lg"
             )}>
-              <Coins size={coinIconSize} color="#581c87" />
+              <Coins size={16} className="sm:w-5 sm:h-5" color="#581c87" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white m-0 leading-none">
+              <p className="text-lg sm:text-xl font-bold text-white m-0 leading-none">
                 {tokenBalance}
               </p>
               <p className="text-xs text-orange-300 m-0 leading-none">
@@ -46,7 +46,7 @@ const TokenBalance = ({ variant = 'full', className = '' }) => {
             </div>
           </div>
           
-          <div className="text-xs text-orange-300/80 text-right">
+          <div className="text-xs text-orange-300/80 text-right hidden sm:block">
             +10 CTK per mint
           </div>
         </div>
