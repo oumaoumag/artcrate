@@ -1,13 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useWeb3 } from '../context/Web3Context';
-import { Trash2, RefreshCw, AlertTriangle, Check } from 'lucide-react';
+FIX_NFT_METADATA_INSTRUCTIONS.md IPFS_FIX_INSTRUCTIONS.md IPFS_VERIFICATION_GUIDE.md NFT_DISPLAY_FIXES_SUMMARY.md NFT_DISPLAY_ISSUES_AND_FIXES.md NFT_FILTER_GUIDE.md REFACTORING_GUIDE.md TROUBLESHOOTING_NFT_DISPLAY.mdimport { Trash2, RefreshCw, AlertTriangle, Check, Settings, Eye, EyeOff } from 'lucide-react';
+import { CARD_CLASSES, TYPOGRAPHY, LAYOUT, ICONS, INTERACTIVE, cn } from '../styles/design-system';
 
+/**
+ * NFTManager Component - Refactored with Tailwind and Design System
+ * Optimized as a standalone tab for managing problematic NFTs
+ */
 const NFTManager = () => {
-    const { mintedNFTs, hideNFTs, showHiddenNFTs, getHiddenNFTs, clearBadNFTCache, loadUserNFTs, contract, account, fixTruncatedHashes } = useWeb3();
+    const { 
+        mintedNFTs, 
+        hideNFTs, 
+        showHiddenNFTs, 
+        getHiddenNFTs, 
+        clearBadNFTCache, 
+        loadUserNFTs, 
+        contract, 
+        account, 
+        fixTruncatedHashes 
+    } = useWeb3();
+    
     const [badNFTs, setBadNFTs] = useState([]);
     const [selectedNFTs, setSelectedNFTs] = useState(new Set());
     const [isProcessing, setIsProcessing] = useState(false);
     const [hiddenCount, setHiddenCount] = useState(0);
+    const [showDetails, setShowDetails] = useState(false);
 
     useEffect(() => {
         // Check for bad NFTs
@@ -77,196 +94,179 @@ const NFTManager = () => {
         setIsProcessing(false);
     };
 
+    // All Good State
     if (badNFTs.length === 0 && hiddenCount === 0) {
         return (
-            <div style={{
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.5), rgba(16, 185, 129, 0.5))',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                borderRadius: '16px',
-                padding: '1.5rem',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-                marginBottom: '1.5rem',
-                textAlign: 'center'
-            }}>
-                <Check size={48} color="#86efac" style={{ margin: '0 auto 1rem' }} />
-                <h3 style={{ color: '#86efac', marginBottom: '0.5rem' }}>All NFTs Look Good!</h3>
-                <p style={{ color: '#bbf7d0', fontSize: '0.875rem' }}>
-                    No NFTs with missing images or metadata found.
-                </p>
+            <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default)}>
+                <div className="text-center py-12">
+                    <Check size={ICONS.sizes.hero} className="mx-auto mb-4 text-green-400" />
+                    <h3 className="text-2xl font-bold text-green-400 mb-2">All NFTs Look Good!</h3>
+                    <p className={TYPOGRAPHY.body.secondary}>
+                        No NFTs with missing images or metadata found.
+                    </p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={{
-            background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.5), rgba(220, 38, 38, 0.5))',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(234, 88, 12, 0.3)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-            marginBottom: '1.5rem'
-        }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <AlertTriangle size={24} color="#fb923c" />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fed7aa', margin: 0 }}>
-                    NFT Manager
-                </h3>
+        <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default)}>
+            {/* Header */}
+            <div className={cn(LAYOUT.flex.between, "mb-6")}>
+                <div className={LAYOUT.flex.start}>
+                    <Settings size={ICONS.sizes.large} color={ICONS.colors.primary} />
+                    <h3 className={TYPOGRAPHY.heading.primary}>NFT Manager</h3>
+                </div>
+                
+                <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className={INTERACTIVE.button.ghost}
+                >
+                    {showDetails ? <EyeOff size={ICONS.sizes.small} /> : <Eye size={ICONS.sizes.small} />}
+                    <span className="text-sm">{showDetails ? 'Hide' : 'Show'} Details</span>
+                </button>
             </div>
 
-            {hiddenCount > 0 && (
-                <div style={{
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(251, 146, 60, 0.3)',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <span style={{ color: '#fed7aa' }}>
-                        {hiddenCount} NFT{hiddenCount !== 1 ? 's' : ''} currently hidden
-                    </span>
-                    <button
-                        onClick={showAllHidden}
-                        disabled={isProcessing}
-                        style={{
-                            background: 'rgba(251, 146, 60, 0.2)',
-                            border: '1px solid rgba(251, 146, 60, 0.5)',
-                            borderRadius: '6px',
-                            padding: '0.25rem 0.75rem',
-                            color: '#fed7aa',
-                            cursor: isProcessing ? 'not-allowed' : 'pointer',
-                            fontSize: '0.875rem',
-                            opacity: isProcessing ? 0.5 : 1,
-                        }}
-                    >
-                        Show All
-                    </button>
-                </div>
-            )}
-
-            {badNFTs.length > 0 && (
-                <>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <p style={{ color: '#fed7aa', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                            Found {badNFTs.length} NFT{badNFTs.length !== 1 ? 's' : ''} with issues:
-                        </p>
-                        
-                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                {/* Hidden NFTs Card */}
+                {hiddenCount > 0 && (
+                    <div className="bg-orange-400/10 border border-orange-400/30 rounded-xl p-4">
+                        <div className={LAYOUT.flex.between}>
+                            <div>
+                                <p className="text-orange-300 text-sm mb-1">Hidden NFTs</p>
+                                <p className="text-2xl font-bold text-orange-400">{hiddenCount}</p>
+                            </div>
                             <button
-                                onClick={selectAll}
-                                style={{
-                                    background: 'rgba(251, 146, 60, 0.2)',
-                                    border: '1px solid rgba(251, 146, 60, 0.5)',
-                                    borderRadius: '6px',
-                                    padding: '0.25rem 0.75rem',
-                                    color: '#fed7aa',
-                                    cursor: 'pointer',
-                                    fontSize: '0.75rem',
-                                }}
+                                onClick={showAllHidden}
+                                disabled={isProcessing}
+                                className={cn(
+                                    "px-3 py-1.5 text-sm rounded-lg transition-all",
+                                    "bg-orange-400/20 border border-orange-400/50 text-orange-300",
+                                    "hover:bg-orange-400/30",
+                                    isProcessing && "opacity-50 cursor-not-allowed"
+                                )}
                             >
-                                Select All
-                            </button>
-                            <button
-                                onClick={deselectAll}
-                                style={{
-                                    background: 'rgba(251, 146, 60, 0.2)',
-                                    border: '1px solid rgba(251, 146, 60, 0.5)',
-                                    borderRadius: '6px',
-                                    padding: '0.25rem 0.75rem',
-                                    color: '#fed7aa',
-                                    cursor: 'pointer',
-                                    fontSize: '0.75rem',
-                                }}
-                            >
-                                Deselect All
+                                Show All
                             </button>
                         </div>
                     </div>
+                )}
 
-                    <div style={{
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        marginBottom: '1rem',
-                        background: 'rgba(0, 0, 0, 0.2)',
-                        borderRadius: '8px',
-                        padding: '0.5rem',
-                    }}>
+                {/* Problematic NFTs Card */}
+                {badNFTs.length > 0 && (
+                    <div className="bg-red-400/10 border border-red-400/30 rounded-xl p-4">
+                        <div className={LAYOUT.flex.between}>
+                            <div>
+                                <p className="text-red-300 text-sm mb-1">Problematic NFTs</p>
+                                <p className="text-2xl font-bold text-red-400">{badNFTs.length}</p>
+                            </div>
+                            <AlertTriangle size={ICONS.sizes.large} className="text-red-400" />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Problematic NFTs Section */}
+            {badNFTs.length > 0 && (
+                <div className="space-y-4">
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={selectAll}
+                            className={cn(INTERACTIVE.button.secondary, "text-sm")}
+                        >
+                            Select All
+                        </button>
+                        <button
+                            onClick={deselectAll}
+                            className={cn(INTERACTIVE.button.secondary, "text-sm")}
+                        >
+                            Deselect All
+                        </button>
+                        <div className="flex-1" />
+                        <button
+                            onClick={hideSelected}
+                            disabled={selectedNFTs.size === 0 || isProcessing}
+                            className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm",
+                                "bg-red-400/20 border border-red-400/50 text-red-300",
+                                "hover:bg-red-400/30",
+                                (selectedNFTs.size === 0 || isProcessing) && "opacity-50 cursor-not-allowed"
+                            )}
+                        >
+                            <Trash2 size={16} />
+                            Hide Selected ({selectedNFTs.size})
+                        </button>
+                        <button
+                            onClick={fixBadMetadata}
+                            disabled={isProcessing}
+                            className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm",
+                                "bg-yellow-400/20 border border-yellow-400/50 text-yellow-300",
+                                "hover:bg-yellow-400/30",
+                                isProcessing && "opacity-50 cursor-not-allowed"
+                            )}
+                        >
+                            <RefreshCw size={16} className={isProcessing ? "animate-spin" : ""} />
+                            Fix Metadata
+                        </button>
+                    </div>
+
+                    {/* NFT List */}
+                    <div className={cn(
+                        "bg-black/20 rounded-xl p-4 space-y-2",
+                        showDetails ? "max-h-96" : "max-h-64",
+                        "overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-400/30 scrollbar-track-transparent"
+                    )}>
                         {badNFTs.map(nft => (
                             <label
                                 key={nft.id}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    padding: '0.5rem',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer',
-                                    background: selectedNFTs.has(nft.id) ? 'rgba(251, 146, 60, 0.2)' : 'transparent',
-                                    marginBottom: '0.25rem',
-                                }}
+                                className={cn(
+                                    "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all",
+                                    "hover:bg-yellow-400/10",
+                                    selectedNFTs.has(nft.id) && "bg-yellow-400/20 border border-yellow-400/30"
+                                )}
                             >
                                 <input
                                     type="checkbox"
                                     checked={selectedNFTs.has(nft.id)}
                                     onChange={() => toggleSelect(nft.id)}
-                                    style={{ cursor: 'pointer' }}
+                                    className="w-4 h-4 rounded border-yellow-400/50 bg-black/30 text-yellow-400 focus:ring-yellow-400 focus:ring-offset-0"
                                 />
-                                <span style={{ color: '#fed7aa', fontSize: '0.875rem' }}>
-                                    {nft.title} (ID: {nft.id})
-                                </span>
-                                <span style={{ color: '#fb923c', fontSize: '0.75rem', marginLeft: 'auto' }}>
-                                    {!nft.image ? 'No image' : 'Bad metadata'}
-                                </span>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-white font-medium">
+                                            {nft.title || `NFT #${nft.id}`}
+                                        </span>
+                                        <span className="text-xs text-orange-300">
+                                            ID: {nft.id}
+                                        </span>
+                                    </div>
+                                    {showDetails && (
+                                        <div className="mt-1 text-xs text-orange-300/70">
+                                            {!nft.image ? 'Missing image' : 'Invalid metadata'}
+                                            {nft.ipfsHash && ` • Hash: ${nft.ipfsHash.substring(0, 8)}...`}
+                                        </div>
+                                    )}
+                                </div>
                             </label>
                         ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                            onClick={hideSelected}
-                            disabled={selectedNFTs.size === 0 || isProcessing}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                background: 'rgba(220, 38, 38, 0.2)',
-                                border: '1px solid rgba(220, 38, 38, 0.5)',
-                                borderRadius: '8px',
-                                padding: '0.5rem 1rem',
-                                color: '#fca5a5',
-                                cursor: selectedNFTs.size === 0 || isProcessing ? 'not-allowed' : 'pointer',
-                                opacity: selectedNFTs.size === 0 || isProcessing ? 0.5 : 1,
-                            }}
-                        >
-                            <Trash2 size={16} />
-                            Hide Selected ({selectedNFTs.size})
-                        </button>
-
-                        <button
-                            onClick={fixBadMetadata}
-                            disabled={isProcessing}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                background: 'rgba(251, 146, 60, 0.2)',
-                                border: '1px solid rgba(251, 146, 60, 0.5)',
-                                borderRadius: '8px',
-                                padding: '0.5rem 1rem',
-                                color: '#fed7aa',
-                                cursor: isProcessing ? 'not-allowed' : 'pointer',
-                                opacity: isProcessing ? 0.5 : 1,
-                            }}
-                        >
-                            <RefreshCw size={16} />
-                            Try Fix Metadata
-                        </button>
+                    {/* Info Box */}
+                    <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-4 text-sm">
+                        <p className="text-yellow-300 mb-2">
+                            <strong>Tips for managing problematic NFTs:</strong>
+                        </p>
+                        <ul className="space-y-1 text-yellow-300/80 list-disc list-inside">
+                            <li>Hide NFTs with missing images to clean up your gallery</li>
+                            <li>Use "Fix Metadata" to attempt recovering IPFS data</li>
+                            <li>Recently minted NFTs may need time for IPFS propagation</li>
+                            <li>Hidden NFTs can be restored anytime using "Show All"</li>
+                        </ul>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
