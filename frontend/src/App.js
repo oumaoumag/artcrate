@@ -6,6 +6,7 @@ import {
   Gallery,
   MintingLog,
   StatsOverview,
+  NFTManager,
 } from './components';
 import AppLayout from './components/Layout/AppLayout';
 import NFTDebugger from './components/NFTDebugger';
@@ -26,25 +27,25 @@ if (process.env.NODE_ENV === 'development') {
  * Uses Tailwind CSS and design system for consistent styling
  */
 const AppContent = () => {
-  const [activeTab, setActiveTab] = useState('mint');
+  const [activeTab, setActiveTab] = useState('gallery'); // Default to gallery to show NFTs on load
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-orange-900 text-white font-sans">
       <Header />
 
-      <main className="p-8 relative z-10">
+      <main className="p-4 sm:p-6 lg:p-8 relative z-10">
         <div className={LAYOUT.container}>
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent mb-4">
+          {/* Compact Hero Section */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent mb-2">
               Afrofuturistic Creator Economy
             </h2>
-            <p className="text-orange-300 text-lg max-w-2xl mx-auto">
-              Mint unique NFTs, earn Creator Tokens, and build your digital art empire in the metaverse
+            <p className="text-orange-300 text-sm sm:text-base max-w-2xl mx-auto">
+              Mint unique NFTs, earn Creator Tokens, and build your digital art empire
             </p>
           </div>
 
-          {/* Stats Overview */}
+          {/* Compact Stats Overview */}
           <StatsOverview />
 
           {/* Main Content with Unified Layout */}
@@ -52,6 +53,7 @@ const AppContent = () => {
             {activeTab === 'mint' && <MintForm />}
             {activeTab === 'gallery' && <Gallery />}
             {activeTab === 'activity' && <MintingLog />}
+            {activeTab === 'manage' && <NFTManager />}
             {process.env.NODE_ENV === 'development' && activeTab === 'debug' && <NFTDebugger />}
           </AppLayout>
         </div>
