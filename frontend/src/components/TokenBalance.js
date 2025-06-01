@@ -1,58 +1,90 @@
 import React from 'react';
 import { Coins } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
+import { CARD_CLASSES, TYPOGRAPHY, LAYOUT, ICONS, cn } from '../styles/design-system';
 
-// Shared card styles
-const cardStyles = {
-    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(234, 88, 12, 0.5))',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(250, 204, 21, 0.3)',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-    marginBottom: '1.5rem'
-};
-
-const TokenBalance = () => {
-    const { tokenBalance } = useWeb3();
-
+/**
+ * Unified TokenBalance Component
+ * Supports both compact and full display modes
+ * Uses design system for consistent styling
+ */
+const TokenBalance = ({ variant = 'full', className = '' }) => {
+  const { tokenBalance } = useWeb3();
+  
+  const isCompact = variant === 'compact';
+  
+  // Dynamic classes based on variant
+  const cardClasses = cn(
+    isCompact ? CARD_CLASSES.compact : CARD_CLASSES.base,
+    isCompact ? CARD_CLASSES.padding.compact : CARD_CLASSES.padding.default,
+    isCompact ? CARD_CLASSES.spacing.compact : CARD_CLASSES.spacing.default,
+    className
+  );
+  
+  const iconSize = isCompact ? ICONS.sizes.medium : ICONS.sizes.large;
+  const coinIconSize = isCompact ? ICONS.sizes.small : ICONS.sizes.xlarge;
+  const coinContainerSize = isCompact ? 'w-10 h-10' : 'w-16 h-16';
+  
+  if (isCompact) {
     return (
-        <div style={cardStyles}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fde047', margin: 0 }}>Creator Tokens</h3>
-                <Coins size={24} color="#facc15" />
+      <div className={cardClasses}>
+        <div className={LAYOUT.flex.between}>
+          <div className={LAYOUT.flex.start}>
+            <div className={cn(
+              coinContainerSize,
+              "bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg"
+            )}>
+              <Coins size={coinIconSize} color="#581c87" />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{
-                    width: '64px',
-                    height: '64px',
-                    background: 'linear-gradient(135deg, #facc15, #f97316)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}>
-                    <Coins size={32} color="#581c87" />
-                </div>
-                <div>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', margin: 0 }}>{tokenBalance}</p>
-                    <p style={{ color: '#fdba74', margin: 0 }}>CTK Balance</p>
-                </div>
+            <div>
+              <p className="text-2xl font-bold text-white m-0 leading-none">
+                {tokenBalance}
+              </p>
+              <p className="text-xs text-orange-300 m-0 leading-none">
+                Creator Tokens
+              </p>
             </div>
-            <div style={{
-                marginTop: '1rem',
-                padding: '0.75rem',
-                background: 'rgba(0,0,0,0.2)',
-                borderRadius: '12px',
-                border: '1px solid rgba(250, 204, 21, 0.2)'
-            }}>
-                <p style={{ fontSize: '0.875rem', color: '#fdba74', margin: 0 }}>
-                    Earn 10 CTK for each NFT you mint • Build your creator economy
-                </p>
-            </div>
+          </div>
+          
+          <div className="text-xs text-orange-300/80 text-right">
+            +10 CTK per mint
+          </div>
         </div>
+      </div>
     );
+  }
+  
+  return (
+    <div className={cardClasses}>
+      <div className={cn(LAYOUT.flex.between, "mb-6")}>
+        <h3 className={TYPOGRAPHY.heading.primary}>Creator Tokens</h3>
+        <Coins size={iconSize} color={ICONS.colors.primary} />
+      </div>
+      
+      <div className={cn(LAYOUT.flex.start, "mb-4")}>
+        <div className={cn(
+          coinContainerSize,
+          "bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl"
+        )}>
+          <Coins size={coinIconSize} color="#581c87" />
+        </div>
+        <div>
+          <p className={TYPOGRAPHY.display.large}>
+            {tokenBalance}
+          </p>
+          <p className={TYPOGRAPHY.body.secondary}>
+            CTK Balance
+          </p>
+        </div>
+      </div>
+      
+      <div className="bg-black/20 border border-yellow-400/20 rounded-xl p-3">
+        <p className={TYPOGRAPHY.body.small}>
+          Earn 10 CTK for each NFT you mint • Build your creator economy
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default TokenBalance;
