@@ -10,4 +10,5 @@ export { default as MintingLog } from './MintingLog';
 export { default as StatsOverview } from './StatsOverview';
 export { default as Navigation } from './Navigation';
 export { default as DemoContent } from './DemoContent';
+export { default as NFTManager } from './NFTManager';
 export { NFTCard, TransferNFTModal};
