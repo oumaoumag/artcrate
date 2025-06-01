@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Image, Filter, Eye, EyeOff } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
 import NFTCard from './NFTCard';
-import NFTManager from './NFTManager';
 import { CARD_CLASSES, TYPOGRAPHY, LAYOUT, ICONS, INTERACTIVE, cn } from '../styles/design-system';
 
 /**
@@ -103,11 +102,7 @@ const Gallery = () => {
     };
 
     return (
-        <>
-            {/* NFT Manager for handling bad NFTs */}
-            {mintedNFTs.length > 0 && <NFTManager />}
-            
-            <div className={cn("card-gradient backdrop-blur-lg border border-yellow-400/30 rounded-2xl shadow-2xl", CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+        <div className={cn("card-gradient backdrop-blur-lg border border-yellow-400/30 rounded-2xl shadow-2xl", CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
                 {/* Header */}
                 <div className={cn(LAYOUT.flex.between, "mb-6")}>
                     <div className={LAYOUT.flex.start}>
@@ -183,7 +178,6 @@ const Gallery = () => {
                     </div>
                 )}
             </div>
-        </>
     );
 };
 
