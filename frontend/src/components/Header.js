@@ -1,7 +1,7 @@
 import React from 'react';
 import { Wallet, Network, User, Star } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
-import { LAYOUT, ICONS, INTERACTIVE, cn } from '../styles/design-system';
+import { LAYOUT, ICONS, cn } from '../styles/design-system';
 
 /**
  * Header Component - Refactored with Tailwind
@@ -80,7 +80,7 @@ const Header = () => {
                             )}
                         >
                             <Wallet size={16} />
-                                <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
+                            <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
                         </button>
                     )}
                 </div>
