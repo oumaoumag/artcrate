@@ -74,7 +74,7 @@ const MintForm = () => {
     // Wallet not connected state
     if (!account) {
         return (
-            <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+            <div className={cn("card-gradient backdrop-blur-lg border border-yellow-400/30 rounded-2xl shadow-2xl", CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
                 <div className="text-center">
                     <Wallet size={ICONS.sizes.hero} color={ICONS.colors.primary} className="mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-yellow-300 mb-2">Connect Your Wallet</h3>
@@ -89,7 +89,7 @@ const MintForm = () => {
     // Wrong network state
     if (!isCorrectNetwork) {
         return (
-            <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+            <div className={cn("card-gradient backdrop-blur-lg border border-yellow-400/30 rounded-2xl shadow-2xl", CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
                 <div className="text-center">
                     <Network size={ICONS.sizes.hero} color="#ef4444" className="mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-red-400 mb-2">Wrong Network</h3>
@@ -102,7 +102,7 @@ const MintForm = () => {
     }
 
     return (
-        <div className={cn(CARD_CLASSES.base, CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
+        <div className={cn("card-gradient backdrop-blur-lg border border-yellow-400/30 rounded-2xl shadow-2xl", CARD_CLASSES.padding.default, CARD_CLASSES.spacing.default)}>
             <div className={cn(LAYOUT.flex.start, "mb-6")}>
                 <Plus size={ICONS.sizes.large} color={ICONS.colors.primary} />
                 <h3 className={TYPOGRAPHY.heading.primary}>Mint New NFT</h3>
