@@ -33,7 +33,7 @@ const AppContent = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-orange-900 text-white font-sans">
       <Header />
 
-      <main className="p-4 sm:p-6 lg:p-8 relative z-10">
+      <main className="p-3 sm:p-4 lg:p-6 relative z-10">
         <div className={LAYOUT.container}>
           {/* Ultra-Compact Hero Section */}
           <div className="text-center mb-3">
