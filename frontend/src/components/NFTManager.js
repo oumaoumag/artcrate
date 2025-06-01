@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWeb3 } from '../context/Web3Context';
-FIX_NFT_METADATA_INSTRUCTIONS.md IPFS_FIX_INSTRUCTIONS.md IPFS_VERIFICATION_GUIDE.md NFT_DISPLAY_FIXES_SUMMARY.md NFT_DISPLAY_ISSUES_AND_FIXES.md NFT_FILTER_GUIDE.md REFACTORING_GUIDE.md TROUBLESHOOTING_NFT_DISPLAY.mdimport { Trash2, RefreshCw, AlertTriangle, Check, Settings, Eye, EyeOff } from 'lucide-react';
+import { Trash2, RefreshCw, AlertTriangle, Check, Settings, Eye, EyeOff } from 'lucide-react';
 import { CARD_CLASSES, TYPOGRAPHY, LAYOUT, ICONS, INTERACTIVE, cn } from '../styles/design-system';
 
 /**
