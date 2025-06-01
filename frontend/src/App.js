@@ -35,12 +35,12 @@ const AppContent = () => {
 
       <main className="p-4 sm:p-6 lg:p-8 relative z-10">
         <div className={LAYOUT.container}>
-          {/* Compact Hero Section */}
-          <div className="text-center mb-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent mb-2">
+          {/* Ultra-Compact Hero Section */}
+          <div className="text-center mb-3">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent mb-1">
               Afrofuturistic Creator Economy
             </h2>
-            <p className="text-orange-300 text-sm sm:text-base max-w-2xl mx-auto">
+            <p className="text-orange-300 text-xs sm:text-sm max-w-2xl mx-auto">
               Mint unique NFTs, earn Creator Tokens, and build your digital art empire
             </p>
           </div>
