@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT IPFS Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(250, 204, 21, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #facc15;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(250, 204, 21, 0.3);
+            border-radius: 8px;
+            color: white;
+            margin-top: 5px;
+        }
+        button {
+            background: linear-gradient(90deg, #eab308, #f97316);
+            color: #581c87;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+        .success {
+            border: 1px solid #4ade80;
+            color: #4ade80;
+        }
+        .error {
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+        .nft-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .nft-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(250, 204, 21, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .nft-card:hover {
+            border-color: rgba(250, 204, 21, 0.5);
+            transform: translateY(-2px);
+        }
+        .nft-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .nft-info {
+            padding: 15px;
+        }
+        .nft-title {
+            font-weight: bold;
+            color: #facc15;
+            margin-bottom: 5px;
+        }
+        .nft-description {
+            color: #fdba74;
+            font-size: 0.9em;
+        }
+        .gateway-test {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 ArtCrate NFT IPFS Verification Tool</h1>
+    
+    <div class="container">
+        <h2>Test IPFS Access</h2>
+        <p>This tool helps verify that your NFTs are properly stored on IPFS and accessible to anyone.</p>
+        
+        <div class="input-group">
+            <label>Enter IPFS Hash or URL:</label>
+            <input type="text" id="ipfsInput" placeholder="QmXxx... or ipfs://QmXxx... or https://ipfs.io/ipfs/QmXxx...">
+        </div>
+        
+        <button onclick="testIPFSAccess()">Test Access</button>
+        <button onclick="testSampleNFT()">Test Sample NFT</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Verify Contract NFTs</h2>
+        <p>Check if NFTs minted on your contract are accessible via IPFS.</p>
+        
+        <div class="input-group">
+            <label>Token ID:</label>
+            <input type="number" id="tokenId" placeholder="Enter token ID (e.g., 1, 2, 3...)">
+        </div>
+        
+        <button onclick="checkContractNFT()">Check NFT</button>
+        
+        <div id="nftResult"></div>
+        <div id="nftDisplay" class="nft-display"></div>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script>
+        const CONTRACT_ADDRESS = '0xC11a4C0bbC828173FB39909C0E81e9251b07B880';
+        const RPC_URL = 'https://rpc.sepolia-api.lisk.com';
+        
+        // Minimal ABI for tokenURI function
+        const ABI = [
+            "function tokenURI(uint256 tokenId) view returns (string)",
+            "function nftTotalSupply() view returns (uint256)"
+        ];
+
+        // IPFS Gateways to test
+        const IPFS_GATEWAYS = [
+            'https://ipfs.io/ipfs/',
+            'https://gateway.pinata.cloud/ipfs/',
+            'https://cloudflare-ipfs.com/ipfs/',
+            'https://dweb.link/ipfs/'
+        ];
+
+        function extractIPFSHash(input) {
+            // Extract IPFS hash from various formats
+            const patterns = [
+                /Qm[a-zA-Z0-9]{44}/,
+                /bafybei[a-zA-Z0-9]{50,}/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = input.match(pattern);
+                if (match) return match[0];
+            }
+            
+            return input;
+        }
+
+        async function testGateway(gateway, hash) {
+            try {
+                const response = await fetch(gateway + hash, { 
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                return { gateway, status: 'accessible' };
+            } catch (error) {
+                return { gateway, status: 'error', error: error.message };
+            }
+        }
+
+        async function testIPFSAccess() {
+            const input = document.getElementById('ipfsInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div class="result error">Please enter an IPFS hash or URL</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result">Testing IPFS access...</div>';
+            
+            const hash = extractIPFSHash(input);
+            let results = '<div class="result success"><strong>IPFS Hash:</strong> ' + hash + '\n\n';
+            
+            // Test each gateway
+            results += '<strong>Gateway Accessibility Test:</strong>\n';
+            
+            for (const gateway of IPFS_GATEWAYS) {
+                const url = gateway + hash;
+                results += `\n<div class="gateway-test">`;
+                results += `<strong>${gateway}</strong>\n`;
+                
+                try {
+                    // Try to fetch content
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const contentType = response.headers.get('content-type');
+                        results += `✅ Accessible - Content-Type: ${contentType}\n`;
+                        results += `<a href="${url}" target="_blank" style="color: #facc15;">Open in new tab</a>`;
+                        
+                        // If it's JSON, try to parse it
+                        if (contentType && contentType.includes('json')) {
+                            try {
+                                const data = await response.json();
+                                results += `\n\nMetadata Preview:\n${JSON.stringify(data, null, 2)}`;
+                            } catch (e) {
+                                // Not JSON or parsing error
+                            }
+                        }
+                    } else {
+                        results += `❌ Not accessible - Status: ${response.status}`;
+                    }
+                } catch (error) {
+                    results += `⚠️ Cannot verify (CORS) - <a href="${url}" target="_blank" style="color: #facc15;">Try opening directly</a>`;
+                }
+                results += `</div>`;
+            }
+            
+            results += '\n\n<strong>Summary:</strong>\n';
+            results += 'If any gateway shows the content as accessible, your IPFS upload is working correctly!\n';
+            results += 'CORS errors are normal for browser security - the content is still accessible.';
+            results += '</div>';
+            
+            resultDiv.innerHTML = results;
+        }
+
+        async function testSampleNFT() {
+            // Test with a known working IPFS hash
+            document.getElementById('ipfsInput').value = 'QmPK1s3pNYLi9ERiq3BDxKa4XosgWwFRQUydHUtz4YgpqB';
+            await testIPFSAccess();
+        }
+
+        async function checkContractNFT() {
+            const tokenId = document.getElementById('tokenId').value;
+            const resultDiv = document.getElementById('nftResult');
+            const displayDiv = document.getElementById('nftDisplay');
+            
+            if (!tokenId) {
+                resultDiv.innerHTML = '<div class="result error">Please enter a token ID</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result">Fetching NFT data from contract...</div>';
+            
+            try {
+                // Connect to contract
+                const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+                
+                // Get token URI
+                const tokenURI = await contract.tokenURI(tokenId);
+                
+                let results = '<div class="result success">';
+                results += `<strong>Token ID:</strong> ${tokenId}\n`;
+                results += `<strong>Token URI:</strong> ${tokenURI}\n\n`;
+                
+                // Extract IPFS hash and fetch metadata
+                const hash = extractIPFSHash(tokenURI);
+                if (hash !== tokenURI) {
+                    results += `<strong>IPFS Hash:</strong> ${hash}\n\n`;
+                    
+                    // Try to fetch metadata
+                    let metadata = null;
+                    let imageUrl = null;
+                    
+                    for (const gateway of IPFS_GATEWAYS) {
+                        try {
+                            const response = await fetch(gateway + hash);
+                            if (response.ok) {
+                                metadata = await response.json();
+                                results += `✅ Metadata fetched successfully from ${gateway}\n\n`;
+                                break;
+                            }
+                        } catch (e) {
+                            // Try next gateway
+                        }
+                    }
+                    
+                    if (metadata) {
+                        results += '<strong>NFT Metadata:</strong>\n';
+                        results += JSON.stringify(metadata, null, 2);
+                        
+                        // Display NFT card
+                        if (metadata.image) {
+                            imageUrl = metadata.image;
+                            if (imageUrl.startsWith('ipfs://')) {
+                                imageUrl = imageUrl.replace('ipfs://', IPFS_GATEWAYS[0]);
+                            }
+                            
+                            displayDiv.innerHTML = `
+                                <div class="nft-card">
+                                    <img src="${imageUrl}" alt="${metadata.name}" class="nft-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect width=%22200%22 height=%22200%22 fill=%22%23333%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22>Image Failed to Load</text></svg>'">
+                                    <div class="nft-info">
+                                        <div class="nft-title">${metadata.name || 'Untitled'}</div>
+                                        <div class="nft-description">${metadata.description || 'No description'}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        results += '⚠️ Could not fetch metadata (may be CORS restricted)\n';
+                        results += `Try opening directly: ${IPFS_GATEWAYS[0] + hash}`;
+                    }
+                }
+                
+                results += '</div>';
+                resultDiv.innerHTML = results;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Test total supply on load
+        window.addEventListener('load', async () => {
+            try {
+                const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+                const totalSupply = await contract.nftTotalSupply();
+                console.log('Total NFTs minted:', totalSupply.toString());
+            } catch (error) {
+                console.error('Error fetching total supply:', error);
+            }
+        });
+    </script>
+</body>
+</html>
