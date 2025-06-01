@@ -32,7 +32,7 @@ const TokenBalance = ({ variant = 'full', className = '' }) => {
           <div className={LAYOUT.flex.start}>
             <div className={cn(
               coinContainerSize,
-              "bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg"
+                "coin-gradient rounded-full flex items-center justify-center shadow-lg"
             )}>
               <Coins size={coinIconSize} color="#581c87" />
             </div>
@@ -64,7 +64,7 @@ const TokenBalance = ({ variant = 'full', className = '' }) => {
       <div className={cn(LAYOUT.flex.start, "mb-4")}>
         <div className={cn(
           coinContainerSize,
-          "bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl"
+          "coin-gradient rounded-full flex items-center justify-center shadow-xl"
         )}>
           <Coins size={coinIconSize} color="#581c87" />
         </div>
