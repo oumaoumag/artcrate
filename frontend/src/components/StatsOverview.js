@@ -33,24 +33,24 @@ const StatsOverview = () => {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
+    <div className="grid grid-cols-3 gap-2 mb-3">
       {stats.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
           <div 
             key={index} 
-            className={cn(CARD_CLASSES.compact, "p-3 sm:p-4")}
+            className={cn(CARD_CLASSES.compact, "p-2 sm:p-3")}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-orange-300 text-xs sm:text-sm mb-0.5">
+                <p className="text-orange-300 text-xs mb-0">
                   {stat.label}
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-white">
+                <p className="text-base sm:text-lg font-bold text-white">
                   {stat.value}
                 </p>
               </div>
-              <IconComponent size={20} className="sm:w-6 sm:h-6 hidden xs:block" color={stat.color} />
+              <IconComponent size={16} className="sm:w-5 sm:h-5 hidden sm:block" color={stat.color} />
             </div>
           </div>
         );
