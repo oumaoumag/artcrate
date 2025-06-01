@@ -1,140 +1,85 @@
 import React from 'react';
 import { Wallet, Network, User, Star } from 'lucide-react';
 import { useWeb3 } from '../context/Web3Context';
+import { LAYOUT, ICONS, INTERACTIVE, cn } from '../styles/design-system';
 
-// Inline styles for the header
-const styles = {
-    header: {
-        background: 'linear-gradient(90deg, #581c87 0%, #ea580c 50%, #eab308 100%)',
-        borderBottom: '4px solid #facc15',
-        padding: '1rem 2rem',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
-    },
-    headerContent: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        maxWidth: '1200px',
-        margin: '0 auto'
-    },
-    logo: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem'
-    },
-    logoIcon: {
-        width: '48px',
-        height: '48px',
-        background: 'linear-gradient(135deg, #facc15, #f97316)',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    },
-    title: {
-        fontSize: '2rem',
-        fontWeight: 'bold',
-        background: 'linear-gradient(90deg, #fde047, #fdba74)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        margin: 0
-    },
-    subtitle: {
-        color: '#fdba74',
-        fontSize: '0.875rem',
-        margin: 0
-    },
-    walletInfo: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        background: 'rgba(0,0,0,0.3)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '12px',
-        padding: '0.5rem 1rem',
-        border: '1px solid rgba(250, 204, 21, 0.3)'
-    },
-    connectButton: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        background: 'linear-gradient(90deg, #eab308, #f97316)',
-        color: '#581c87',
-        fontWeight: 'bold',
-        padding: '0.75rem 1.5rem',
-        borderRadius: '12px',
-        border: 'none',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    }
-};
-
+/**
+ * Header Component - Refactored with Tailwind
+ * Responsive header with wallet connection
+ */
 const Header = () => {
     const { account, balance, isConnecting, connectWallet, isCorrectNetwork, switchToLiskSepolia } = useWeb3();
 
     return (
-        <header style={styles.header}>
-            <div style={styles.headerContent}>
-                <div style={styles.logo}>
-                    <div style={styles.logoIcon}>
-                        <Star size={24} color="#581c87" />
+        <header className="header-gradient border-b-4 border-yellow-400 p-4 lg:p-8 shadow-2xl">
+            <div className={cn(LAYOUT.container, "flex flex-col sm:flex-row justify-between items-center gap-4")}>
+                {/* Logo */}
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 coin-gradient rounded-full flex items-center justify-center shadow-xl">
+                        <Star size={ICONS.sizes.large} color="#581c87" />
                     </div>
                     <div>
-                        <h1 style={styles.title}>ArtCrate</h1>
-                        <p style={styles.subtitle}>Afrofuturistic Creator Economy</p>
+                        <h1 className="text-3xl font-bold text-gradient-primary">
+                            ArtCrate
+                        </h1>
+                        <p className="text-orange-300 text-sm">
+                            Afrofuturistic Creator Economy
+                        </p>
                     </div>
                 </div>
 
+                {/* Wallet Connection */}
                 <div>
                     {account ? (
-                        <div style={styles.walletInfo}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Network size={16} color={isCorrectNetwork ? '#4ade80' : '#ef4444'} />
-                                <span style={{ fontSize: '0.875rem', color: isCorrectNetwork ? '#4ade80' : '#ef4444' }}>
+                        <div className="flex flex-wrap items-center gap-4 bg-black/30 backdrop-blur-lg rounded-xl px-4 py-2 border border-yellow-400/30">
+                            {/* Network Status */}
+                            <div className="flex items-center gap-2">
+                                <Network 
+                                    size={ICONS.sizes.small} 
+                                    color={isCorrectNetwork ? '#4ade80' : '#ef4444'} 
+                                />
+                                <span className={cn(
+                                    "text-sm",
+                                    isCorrectNetwork ? "text-green-400" : "text-red-400"
+                                )}>
                                     {isCorrectNetwork ? 'Lisk Sepolia' : 'Wrong Network'}
                                 </span>
                                 {!isCorrectNetwork && (
                                     <button
                                         onClick={switchToLiskSepolia}
-                                        style={{
-                                            marginLeft: '0.5rem',
-                                            padding: '0.25rem 0.5rem',
-                                            background: '#ef4444',
-                                            color: 'white',
-                                            fontSize: '0.75rem',
-                                            borderRadius: '4px',
-                                            border: 'none',
-                                            cursor: 'pointer'
-                                        }}
+                                        className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded border-none cursor-pointer hover:bg-red-600 transition-colors"
                                     >
                                         Switch
                                     </button>
                                 )}
                             </div>
-                            <div style={{ width: '1px', height: '24px', background: 'rgba(250, 204, 21, 0.3)' }}></div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <User size={16} color="#facc15" />
-                                <span style={{ color: '#fde047', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                            
+                            {/* Divider */}
+                            <div className="hidden sm:block w-px h-6 bg-yellow-400/30" />
+                            
+                            {/* Account Info */}
+                            <div className="flex items-center gap-2">
+                                <User size={ICONS.sizes.small} color={ICONS.colors.primary} />
+                                <span className="text-yellow-300 font-mono text-sm">
                                     {account.slice(0, 6)}...{account.slice(-4)}
                                 </span>
                             </div>
+                            
+                            {/* Balance */}
                             <div>
-                                <span style={{ color: '#fdba74', fontSize: '0.875rem' }}>{balance} ETH</span>
+                                <span className="text-orange-300 text-sm">{balance} ETH</span>
                             </div>
                         </div>
                     ) : (
                         <button
                             onClick={connectWallet}
                             disabled={isConnecting}
-                            style={{
-                                ...styles.connectButton,
-                                opacity: isConnecting ? 0.5 : 1,
-                                cursor: isConnecting ? 'not-allowed' : 'pointer'
-                            }}
+                            className={cn(
+                                INTERACTIVE.button.primary,
+                                "shadow-xl"
+                            )}
                         >
-                            <Wallet size={20} />
+                            <Wallet size={ICONS.sizes.medium} />
                             <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
                         </button>
                     )}
